@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/screens/dashboard/dashboard_screen.dart';
 import 'package:nqconnect/screens/login/login_screen.dart';
+import 'package:nqconnect/screens/placeholder_screen.dart';
 
 void main() {
   Get.put(UserController(), permanent: true);
@@ -38,12 +39,72 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/login', page: () => LoginScreen()),
         GetPage(name: '/dashboard', page: () => DashboardScreen()),
-        // GetPage(name: '/profile', page: () => ProfileScreen()),
-        // GetPage(name: '/tasks', page: () => TasksScreen()),
-        // GetPage(name: '/messages', page: () => MessagesScreen()),
-        // GetPage(name: '/reports', page: () => ReportsScreen()),
-        // GetPage(name: '/settings', page: () => SettingsScreen()),
-        // GetPage(name: '/logout', page: () => LogoutScreen()),
+        // Placeholders for now
+        // Employee Routes
+        GetPage(
+          name: '/employee_overview',
+          page: () => PlaceholderScreen(title: "Employee Overview"),
+        ),
+        GetPage(
+          name: '/tasks',
+          page: () => PlaceholderScreen(title: "My Tasks"),
+        ),
+        GetPage(
+          name: '/suggestions',
+          page: () => PlaceholderScreen(title: "Suggestion Box"),
+        ),
+        GetPage(
+          name: '/votes',
+          page: () => PlaceholderScreen(title: "Vote on Suggestions"),
+        ),
+
+        // Manager Routes
+        GetPage(
+          name: '/team_overview',
+          page: () => PlaceholderScreen(title: "Team Performance Overview"),
+        ),
+        GetPage(
+          name: '/task_assignment',
+          page: () => PlaceholderScreen(title: "Task Assignment"),
+        ),
+        GetPage(
+          name: '/suggestion_insights',
+          page: () => PlaceholderScreen(title: "Suggestion Insights"),
+        ),
+        GetPage(
+          name: '/approvals',
+          page: () => PlaceholderScreen(title: "Approve / Reject Suggestions"),
+        ),
+        GetPage(
+          name: '/activity_feed',
+          page: () => PlaceholderScreen(title: "Employee Activity Feed"),
+        ),
+        GetPage(
+          name: '/notifications',
+          page: () => PlaceholderScreen(title: "Notifications"),
+        ),
+
+        // Admin Routes
+        GetPage(
+          name: '/system_overview',
+          page: () => PlaceholderScreen(title: "System Overview / Analytics"),
+        ),
+        GetPage(
+          name: '/task_overview',
+          page: () => PlaceholderScreen(title: "Task Overview"),
+        ),
+        GetPage(
+          name: '/suggestion_management',
+          page: () => PlaceholderScreen(title: "Suggestion Management"),
+        ),
+        GetPage(
+          name: '/innovation_analytics',
+          page: () => PlaceholderScreen(title: "Innovation Analytics"),
+        ),
+        GetPage(
+          name: '/configurations',
+          page: () => PlaceholderScreen(title: "Sections & Configurations"),
+        ),
       ],
     );
   }

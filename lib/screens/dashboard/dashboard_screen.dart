@@ -1,5 +1,5 @@
-// ignore_for_file: use_key_in_widget_constructors
-
+// ignore_for_file: use_key_in_widget_constructors, deprecated_member_use
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
@@ -39,6 +39,7 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildSectionCard(BuildContext context, Section section) {
+    final bool isLargeScreen = Responsive.width(context) > 600;
     return GestureDetector(
       onTap: () {
         if (section.name == "Logout") {
@@ -47,26 +48,62 @@ class DashboardScreen extends StatelessWidget {
           Get.toNamed(section.route);
         }
       },
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(section.icon, size: 50, color: Colors.blue.shade900),
-              SizedBox(height: 12),
-              Text(
-                section.name,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: Responsive.font(context, 16),
-                  fontWeight: FontWeight.bold,
-                ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), // 👈 glass blur
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.blue.shade900.withOpacity(0.9), // 👈 transparency
+                  Colors.blue.shade700.withOpacity(0.4),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2), // 👈 frosted border
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  offset: Offset(6, 6),
+                  blurRadius: 10,
+                ),
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.3),
+                  offset: Offset(-6, -6),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(Responsive.width(context) * 0.05),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    section.icon,
+                    size: isLargeScreen ? 70 : 50,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: Responsive.height(context) * 0.012),
+                  Text(
+                    section.name,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: Responsive.font(context, 16),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -82,7 +119,7 @@ class DashboardScreen extends StatelessWidget {
       if (sec.fullWidth) {
         // Full width section
         children.add(_buildSectionCard(context, sec));
-        children.add(SizedBox(height: 16));
+        children.add(SizedBox(height: Responsive.height(context) * 0.016));
       } else {
         // Pair side by side (except logout if last)
         if (i + 1 < sections.length && !sections[i + 1].fullWidth) {
@@ -90,16 +127,16 @@ class DashboardScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(child: _buildSectionCard(context, sec)),
-                SizedBox(width: 16),
+                SizedBox(width: Responsive.width(context) * 0.04),
                 Expanded(child: _buildSectionCard(context, sections[i + 1])),
               ],
             ),
           );
-          children.add(SizedBox(height: 16));
+          children.add(SizedBox(height: Responsive.height(context) * 0.016));
           i++; // skip next
         } else {
           children.add(_buildSectionCard(context, sec));
-          children.add(SizedBox(height: 16));
+          children.add(SizedBox(height: Responsive.height(context) * 0.016));
         }
       }
     }
@@ -110,7 +147,6 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final role = userController.role.value;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -118,14 +154,17 @@ class DashboardScreen extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: Responsive.font(context, 28),
+            fontSize: Responsive.font(
+              context,
+              Responsive.height(context) * 0.035,
+            ),
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.blue.shade900,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(Responsive.width(context) * 0.04),
         child: _buildRoleBasedLayout(context, role),
       ),
     );
