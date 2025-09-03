@@ -59,12 +59,12 @@ class DashboardController extends GetxController {
     ),
     Section(name: "Logout", icon: Icons.logout_outlined, route: ""),
   ];
-
+  // ----------------------------------Admin Section--------------------------------------------------------
   List<Section> adminSections = [
     Section(
-      name: "System Overview / Analytics",
+      name: "Suggestions Overview / Analytics",
       icon: Icons.analytics,
-      route: "/system_overview",
+      route: "/suggestion_overview",
       fullWidth: true,
     ),
     Section(name: "Task Overview", icon: Icons.task, route: "/task_overview"),

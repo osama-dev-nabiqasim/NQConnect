@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
 
         // Admin Routes
         GetPage(
-          name: '/system_overview',
+          name: '/suggestion_overview',
           page: () => PlaceholderScreen(title: "System Overview / Analytics"),
         ),
         GetPage(
