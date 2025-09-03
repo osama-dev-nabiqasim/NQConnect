@@ -1,0 +1,308 @@
+// ignore_for_file: deprecated_member_use, sized_box_for_whitespace
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:nqconnect/controllers/user_controller.dart';
+import 'package:nqconnect/data/dummy_db.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _employeeIdController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool isPasswordVisible = false;
+  bool isButtonEnabled = false;
+
+  // final UserController userController = Get.put(UserController());
+  final UserController userController = Get.find<UserController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _employeeIdController.addListener(_validateFields);
+    _passwordController.addListener(_validateFields);
+  }
+
+  void _validateFields() {
+    setState(() {
+      isButtonEnabled =
+          _employeeIdController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty;
+    });
+  }
+
+  void _login() {
+    if (_formKey.currentState!.validate()) {
+      final id = _employeeIdController.text.trim();
+      final pass = _passwordController.text.trim();
+
+      final user = DummyDB.users.firstWhere(
+        (u) => u["employeeId"] == id && u["password"] == pass,
+        orElse: () => {},
+      );
+
+      if (user.isNotEmpty) {
+        // set user data in controller
+        userController.setUserData(
+          user["employeeId"]!,
+          user["name"]!,
+          user["role"]!,
+        );
+
+        Get.snackbar(
+          "Login Successful",
+          "Welcome, ${user["name"]}",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        _employeeIdController.clear();
+        _passwordController.clear();
+        setState(() => isButtonEnabled = false);
+
+        // redirect based on role
+        Get.offNamed('/dashboard');
+      } else {
+        Get.snackbar(
+          "Error",
+          "Invalid Employee ID or Password",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _employeeIdController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // 🚀 ye Drawer icon hata dega
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          height: screenHeight,
+          child: Stack(
+            children: [
+              // Top Gradient Background
+              Container(
+                height: screenHeight / 2.5,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blue.shade900,
+                      Colors.blue.shade700.withOpacity(0.6),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+
+              // White card container
+              Container(
+                margin: EdgeInsets.only(top: screenHeight / 3),
+                height: screenHeight / 1.5,
+                width: screenWidth,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
+                ),
+              ),
+
+              // Login Form
+              Positioned(
+                top: screenHeight / 15,
+                left: 20,
+                right: 20,
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.business,
+                      size: screenHeight * 0.12,
+                      color: Colors.white,
+                    ),
+                    SizedBox(height: 20),
+
+                    Material(
+                      elevation: 8,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 28,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              Text(
+                                "Login Page",
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              SizedBox(height: 30),
+
+                              _employeeIdField(),
+                              SizedBox(height: 20),
+                              _passwordField(),
+                              SizedBox(height: 30),
+
+                              _loginButton(context),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Get.snackbar(
+                              "Forgot Password",
+                              "This functionality is not build yet.",
+                            );
+                          },
+                          child: Text(
+                            "Forgot Password?",
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.04,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _employeeIdField() {
+    return Material(
+      elevation: 4,
+      shadowColor: Colors.grey.withOpacity(0.3),
+      borderRadius: BorderRadius.circular(18),
+      child: TextFormField(
+        controller: _employeeIdController,
+        validator: (value) =>
+            value == null || value.isEmpty ? "Employee ID required" : null,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
+          labelText: "Employee ID",
+          prefixIcon: Icon(Icons.person_outline),
+        ),
+      ),
+    );
+  }
+
+  Widget _passwordField() {
+    return Material(
+      elevation: 4,
+      shadowColor: Colors.grey.withOpacity(0.3),
+      borderRadius: BorderRadius.circular(18),
+      child: TextFormField(
+        controller: _passwordController,
+        obscureText: !isPasswordVisible,
+        validator: (value) =>
+            value == null || value.isEmpty ? "Password required" : null,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
+          labelText: "Password",
+          prefixIcon: Icon(Icons.lock_outline),
+          suffixIcon: IconButton(
+            icon: Icon(
+              isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+            ),
+            onPressed: () {
+              setState(() {
+                isPasswordVisible = !isPasswordVisible;
+              });
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _loginButton(BuildContext context) {
+    return GestureDetector(
+      onTap: isButtonEnabled ? _login : null,
+      child: Material(
+        elevation: 5,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            gradient: isButtonEnabled
+                ? LinearGradient(
+                    colors: [
+                      const Color.fromARGB(255, 5, 71, 171),
+                      const Color.fromARGB(255, 122, 139, 164),
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  )
+                : LinearGradient(
+                    colors: [Colors.grey.shade500, Colors.grey.shade400],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              "LOGIN",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
