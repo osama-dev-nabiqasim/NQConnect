@@ -278,11 +278,11 @@ class _LoginScreenState extends State<LoginScreen> {
             gradient: isButtonEnabled
                 ? LinearGradient(
                     colors: [
-                      const Color.fromARGB(255, 5, 71, 171),
-                      const Color.fromARGB(255, 122, 139, 164),
+                      Colors.blue.shade900.withOpacity(0.9), // 👈 transparency
+                      Colors.blue.shade400.withOpacity(0.9),
                     ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   )
                 : LinearGradient(
                     colors: [Colors.grey.shade500, Colors.grey.shade400],
