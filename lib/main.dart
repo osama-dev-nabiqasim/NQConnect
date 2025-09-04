@@ -9,6 +9,7 @@ import 'package:nqconnect/screens/auth_screens/reset_password_screens/forgot_pas
 import 'package:nqconnect/screens/dashboard/dashboard_screen.dart';
 import 'package:nqconnect/screens/auth_screens/login_screen.dart';
 import 'package:nqconnect/screens/placeholder_screen.dart';
+import 'package:nqconnect/screens/suggestion_screens/EmployeeSuggestionFormScreen.dart';
 
 void main() {
   Get.put(UserController(), permanent: true);
@@ -52,6 +53,11 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/dashboard', page: () => DashboardScreen()),
         GetPage(name: '/forgotpassword', page: () => ForgotPasswordScreen()),
         GetPage(name: '/enterotpscreen', page: () => EnterOtpScreen()),
+        GetPage(
+          name: '/suggestions',
+          page: () => EmployeeSuggestionFormScreen(),
+        ),
+
         GetPage(
           name: '/resetpasswordscreen',
           page: () => ResetPasswordScreen(),

@@ -4,6 +4,9 @@ import 'package:nqconnect/models/section_model.dart';
 
 class DashboardController extends GetxController {
   // Role-based sections
+
+  // ------------------------Employee Section-----------------------------
+
   List<Section> employeeSections = [
     Section(
       name: "Quick Stats / Overview",
@@ -24,6 +27,8 @@ class DashboardController extends GetxController {
     ),
     Section(name: "Logout", icon: Icons.logout_outlined, route: ""),
   ];
+
+  // ------------------------Manager Section-----------------------------
 
   List<Section> managerSections = [
     Section(
