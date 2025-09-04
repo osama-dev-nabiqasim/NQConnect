@@ -1,5 +1,5 @@
 // ignore_for_file: prefer_const_constructors, deprecated_member_use
-
+import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,14 +14,17 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   void _sendResetCode() {
     if (_formKey.currentState!.validate()) {
       String email = _emailController.text.trim();
+      String phonenumber = _phoneController.text.trim();
+
       Get.snackbar(
         "Success",
-        "Reset code sent to $email",
+        "OTP sent to $email and $phonenumber",
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -105,7 +108,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            "Enter your registered email to receive OTP.",
+                            "Enter your registered email and phone number to receive OTP.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
@@ -136,6 +139,73 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                               hintText: "Email",
                               labelText: "Email",
+                              labelStyle: TextStyle(color: Colors.white),
+                              hintStyle: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.1),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withOpacity(0.3),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withOpacity(0.3),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 25),
+
+                          // Phone # Input
+                          TextFormField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                              // Custom formatter to add dash after 3 digits
+                              _PakistanPhoneFormatter(),
+                            ],
+                            validator: (value) {
+                              final digitsOnly =
+                                  value?.replaceAll('-', '') ?? '';
+                              if (digitsOnly.isEmpty) {
+                                return "Please enter your phone number";
+                              } else if (!RegExp(
+                                r'^3[0-9]{9}$',
+                              ).hasMatch(digitsOnly)) {
+                                return "Enter a valid 10-digit phone number starting with 3";
+                              }
+                              return null;
+                            },
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              prefixIcon: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 15.0,
+                                  horizontal: 16,
+                                ),
+                                child: Text(
+                                  "+92",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              hintText: "3XX-XXXXXXX",
+                              labelText: "Phone Number",
                               labelStyle: TextStyle(color: Colors.white),
                               hintStyle: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
@@ -207,6 +277,38 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PakistanPhoneFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Remove all non-digits
+    final newText = newValue.text;
+    final digitsOnly = newText.replaceAll(RegExp(r'[^\d]'), '');
+
+    // If empty, return as is
+    if (digitsOnly.isEmpty) return newValue;
+
+    // Limit to 10 digits
+    final limitedDigits = digitsOnly.length > 10
+        ? digitsOnly.substring(0, 10)
+        : digitsOnly;
+
+    // Format as 3XX-XXXXXXX
+    String formattedText = limitedDigits;
+    if (limitedDigits.length > 3) {
+      formattedText =
+          '${limitedDigits.substring(0, 3)}-${limitedDigits.substring(3)}';
+    }
+
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
     );
   }
 }

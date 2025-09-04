@@ -226,23 +226,37 @@ class _EmployeeSuggestionFormScreenState
 
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
-      prefixIcon: Icon(icon, color: Colors.black),
+      prefixIcon: Icon(icon, color: Colors.blue.shade700),
       labelText: label,
       labelStyle: TextStyle(color: Colors.black),
-      hintStyle: TextStyle(color: Colors.black.withOpacity(0.7)),
+      hintStyle: TextStyle(color: Colors.grey.shade600),
       filled: true,
-      fillColor: Colors.black54.withOpacity(0.1),
+      fillColor: Colors.grey.shade50,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        borderSide: BorderSide(color: Colors.black),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        borderSide: BorderSide(color: Colors.black54),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.blue),
+        borderSide: BorderSide(
+          color: Colors.blue.shade700,
+          width: 1.5,
+        ), // Blue when focused
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: Colors.red), // Red for errors
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(
+          color: Colors.red,
+          width: 1.5,
+        ), // Red when focused with error
       ),
     );
   }
