@@ -1,30 +1,32 @@
-// ignore_for_file: prefer_const_constructors, deprecated_member_use
+// ignore_for_file: prefer_const_constructors, deprecated_member_use, unused_local_variable
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+class EnterOtpScreen extends StatefulWidget {
+  const EnterOtpScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  State<EnterOtpScreen> createState() => _EnterOtpScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final TextEditingController _emailController = TextEditingController();
+class _EnterOtpScreenState extends State<EnterOtpScreen> {
+  final TextEditingController _otpController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  void _sendResetCode() {
+  void _verifyOtp() {
     if (_formKey.currentState!.validate()) {
-      String email = _emailController.text.trim();
+      String otp = _otpController.text.trim();
+      // TODO: call your controller logic to verify OTP
       Get.snackbar(
         "Success",
-        "Reset code sent to $email",
+        "OTP Verified Successfully",
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+      Get.toNamed("/reset_password"); // Navigate to reset password
     }
   }
 
@@ -40,7 +42,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          "Forgot Password",
+          "Enter Code",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
@@ -53,28 +55,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             center: Alignment.center,
             radius: 1.4,
             colors: [Colors.blue.shade900, Colors.blue.shade400],
-            // begin: Alignment.topLeft,
-            // end: Alignment.bottomRight,
           ),
         ),
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: screenWidth(context) * 0.02,
+            horizontal: screenWidth(context) * 0.05,
           ),
           child: Column(
             children: [
               SizedBox(height: screenHeight(context) * 0.12),
-              // Logo
               Center(
                 child: Icon(
-                  Icons.business,
+                  Icons.lock_clock,
                   size: screenHeight(context) * 0.12,
                   color: Colors.white,
                 ),
               ),
               SizedBox(height: 30),
 
-              // Glassy Card Container
+              // Glass Card
               ClipRRect(
                 borderRadius: BorderRadius.circular(25),
                 child: BackdropFilter(
@@ -95,7 +94,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       child: Column(
                         children: [
                           Text(
-                            "Reset Your Password",
+                            "Enter OTP",
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -104,7 +103,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            "Enter your registered email to receive OTP.",
+                            "We have sent a 6-digit code to your email.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
@@ -113,41 +112,30 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                           SizedBox(height: 30),
 
-                          // Email Input
+                          // OTP Input
                           TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
+                            controller: _otpController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 6,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return "Please enter your email";
-                              } else if (!RegExp(
-                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$',
-                              ).hasMatch(value)) {
-                                return "Enter a valid email address";
+                                return "Please enter OTP code";
+                              } else if (value.length < 6) {
+                                return "OTP must be 6 digits";
                               }
                               return null;
                             },
                             style: TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              prefixIcon: Icon(
-                                Icons.email_outlined,
-                                color: Colors.white,
-                              ),
-                              hintText: "Email",
-                              labelText: "Email",
-                              labelStyle: TextStyle(color: Colors.white),
+                              counterText: "",
+                              prefixIcon: Icon(Icons.pin, color: Colors.white),
+                              hintText: "Enter Code",
                               hintStyle: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
                               ),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.1),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.3),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(18),
                                 borderSide: BorderSide(
                                   color: Colors.white.withOpacity(0.3),
@@ -161,9 +149,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                           SizedBox(height: 25),
 
-                          // Send Code Button
+                          // Verify Button
                           GestureDetector(
-                            onTap: _sendResetCode,
+                            onTap: _verifyOtp,
                             child: Container(
                               width: double.infinity,
                               padding: EdgeInsets.symmetric(vertical: 14),
@@ -185,7 +173,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                               child: Center(
                                 child: Text(
-                                  "Send Code",
+                                  "Verify",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
