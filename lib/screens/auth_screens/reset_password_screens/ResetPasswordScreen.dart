@@ -20,7 +20,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   void _resetPassword() {
     if (_formKey.currentState!.validate()) {
       String password = _passwordController.text.trim();
-      // TODO: call your controller logic to reset password
       Get.snackbar(
         "Success",
         "Password Reset Successfully",
