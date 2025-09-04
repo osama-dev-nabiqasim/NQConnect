@@ -1,5 +1,5 @@
 // ignore_for_file: deprecated_member_use, sized_box_for_whitespace
-
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
@@ -122,15 +122,31 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               // White card container
-              Container(
-                margin: EdgeInsets.only(top: screenHeight / 3),
-                height: screenHeight / 1.5,
-                width: screenWidth,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(40),
-                    topRight: Radius.circular(40),
+              BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 20,
+                  sigmaY: 20,
+                ), // 👈 glass blur
+
+                child: Container(
+                  margin: EdgeInsets.only(top: screenHeight / 3),
+                  height: screenHeight / 1.5,
+                  width: screenWidth,
+                  decoration: BoxDecoration(
+                    // gradient: RadialGradient(
+                    //   center: Alignment.center,
+                    //   radius: 1.2,
+                    //   colors: [
+                    //     const Color.fromARGB(255, 255, 255, 255),
+                    //     const Color(0xFFE6E6E6),
+                    //   ],
+                    //   // begin: Alignment.topLeft,
+                    //   // end: Alignment.bottomRight,
+                    // ),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(40),
+                      topRight: Radius.circular(40),
+                    ),
                   ),
                 ),
               ),
@@ -154,10 +170,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 20,
+                          horizontal: 28,
                           vertical: 28,
                         ),
                         decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            center: Alignment.center,
+                            radius: 1.2,
+                            colors: [Colors.grey.shade200, Colors.white70],
+                            // begin: Alignment.topLeft,
+                            // end: Alignment.bottomRight,
+                          ),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Form(
@@ -192,10 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Get.snackbar(
-                              "Forgot Password",
-                              "This functionality is not build yet.",
-                            );
+                            Get.toNamed('/forgotpassword');
                           },
                           child: Text(
                             "Forgot Password?",

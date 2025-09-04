@@ -3,8 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
+import 'package:nqconnect/screens/auth_screens/forgot_password.dart';
 import 'package:nqconnect/screens/dashboard/dashboard_screen.dart';
-import 'package:nqconnect/screens/login/login_screen.dart';
+import 'package:nqconnect/screens/auth_screens/login_screen.dart';
 import 'package:nqconnect/screens/placeholder_screen.dart';
 
 void main() {
@@ -17,12 +18,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
+      title: "NQconnect",
       theme: ThemeData(
+        primarySwatch: Colors.blue,
         primaryColor: Colors.blue[900],
         scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue.shade400,
+          foregroundColor: Colors.white,
+          centerTitle: true,
+        ),
         textTheme: TextTheme(
           bodyLarge: TextStyle(color: Colors.black),
           bodyMedium: TextStyle(color: Colors.black),
+          titleLarge: TextStyle(fontWeight: FontWeight.bold),
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(),
@@ -39,6 +48,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/login', page: () => LoginScreen()),
         GetPage(name: '/dashboard', page: () => DashboardScreen()),
+        GetPage(name: '/forgotpassword', page: () => ForgotPasswordScreen()),
         // Placeholders for now
         // Employee Routes
         GetPage(

@@ -51,10 +51,11 @@ class DashboardScreen extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), // 👈 glass blur
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // 👈 glass blur
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
+
               gradient: LinearGradient(
                 colors: [
                   Colors.blue.shade900.withOpacity(0.9), // 👈 transparency
@@ -156,7 +157,7 @@ class DashboardScreen extends StatelessWidget {
             color: Colors.white,
             fontSize: Responsive.font(
               context,
-              Responsive.height(context) * 0.035,
+              Responsive.height(context) * 0.030,
             ),
           ),
         ),

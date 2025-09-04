@@ -10,3 +10,6 @@ class Responsive {
   static double font(BuildContext context, double size) =>
       (width(context) / 390) * size; // base iPhone 12 width reference
 }
+
+double screenHeight(BuildContext context) => MediaQuery.of(context).size.height;
+double screenWidth(BuildContext context) => MediaQuery.of(context).size.height;
