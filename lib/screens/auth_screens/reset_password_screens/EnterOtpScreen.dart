@@ -26,7 +26,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-      Get.toNamed("/reset_password"); // Navigate to reset password
+      Get.offNamed("/resetpasswordscreen"); // Navigate to reset password
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/EnterOtpScreen.dart';
+import 'package:nqconnect/screens/auth_screens/reset_password_screens/ResetPasswordScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/forgot_password.dart';
 import 'package:nqconnect/screens/dashboard/dashboard_screen.dart';
 import 'package:nqconnect/screens/auth_screens/login_screen.dart';
@@ -51,6 +52,10 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/dashboard', page: () => DashboardScreen()),
         GetPage(name: '/forgotpassword', page: () => ForgotPasswordScreen()),
         GetPage(name: '/enterotpscreen', page: () => EnterOtpScreen()),
+        GetPage(
+          name: '/resetpasswordscreen',
+          page: () => ResetPasswordScreen(),
+        ),
         // Placeholders for now
         // Employee Routes
         GetPage(
