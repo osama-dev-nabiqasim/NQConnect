@@ -2,11 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/routes/app_routes.dart';
 
 void main() {
   Get.put(UserController(), permanent: true);
+  WidgetsFlutterBinding.ensureInitialized();
+  Get.lazyPut(() => SuggestionController());
   runApp(MyApp());
 }
 

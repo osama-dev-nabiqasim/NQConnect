@@ -1,5 +1,6 @@
 // lib/routes/app_routes.dart
 import 'package:get/get.dart';
+import 'package:nqconnect/models/suggestion_list_screen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/EnterOtpScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/ResetPasswordScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/forgot_password.dart';
@@ -16,6 +17,7 @@ class AppRoutes {
     GetPage(name: '/suggestions', page: () => EmployeeSuggestionFormScreen()),
     GetPage(name: '/resetpasswordscreen', page: () => ResetPasswordScreen()),
 
+    GetPage(name: "/suggestion_list", page: () => const SuggestionListScreen()),
     GetPage(name: '/dashboard', page: () => DashboardScreen()),
 
     // Employee Routes

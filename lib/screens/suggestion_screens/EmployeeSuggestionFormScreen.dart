@@ -4,6 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:nqconnect/controllers/suggestion_controller.dart';
+import 'package:nqconnect/models/suggestion_model.dart';
+
 class EmployeeSuggestionFormScreen extends StatefulWidget {
   const EmployeeSuggestionFormScreen({super.key});
 
@@ -14,12 +17,16 @@ class EmployeeSuggestionFormScreen extends StatefulWidget {
 
 class _EmployeeSuggestionFormScreenState
     extends State<EmployeeSuggestionFormScreen> {
+  final _descriptionController = TextEditingController();
+  // String? _selectedCategory;
+
+  final SuggestionController _controller = Get.find<SuggestionController>();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descController = TextEditingController();
+  // final TextEditingController _descController = TextEditingController();
   String? _selectedCategory;
   String? _imagePath; // optional
-
+  // final SuggestionController _controller = Get.find<SuggestionController>();
   final List<String> categories = ["Workplace", "Process", "Team", "Other"];
 
   void _pickImage() async {
@@ -29,24 +36,25 @@ class _EmployeeSuggestionFormScreenState
     });
   }
 
-  void _submitSuggestion() {
+  void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      String title = _titleController.text.trim();
-      String description = _descController.text.trim();
-      String category = _selectedCategory ?? "Other";
+      final suggestion = Suggestion(
+        title: _titleController.text,
+        description: _descriptionController.text,
+        category: _selectedCategory ?? "General",
+      );
+
+      _controller.addSuggestion(suggestion);
 
       Get.snackbar(
-        "Submitted",
+        "Success",
         "Suggestion sent for review",
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
 
-      // Later: send to backend / Firebase / API
-      print("Title: $title");
-      print("Description: $description");
-      print("Category: $category");
-      print("Image: $_imagePath");
+      Get.offNamed("/suggestion_list"); // Navigate to list
     }
   }
 
@@ -116,7 +124,7 @@ class _EmployeeSuggestionFormScreenState
 
                       // Description
                       TextFormField(
-                        controller: _descController,
+                        controller: _descriptionController,
                         validator: (value) => value == null || value.isEmpty
                             ? "Enter description"
                             : null,
@@ -181,7 +189,7 @@ class _EmployeeSuggestionFormScreenState
 
                       // Submit Button
                       GestureDetector(
-                        onTap: _submitSuggestion,
+                        onTap: _submitForm,
                         child: Container(
                           width: double.infinity,
                           padding: EdgeInsets.symmetric(vertical: 14),
