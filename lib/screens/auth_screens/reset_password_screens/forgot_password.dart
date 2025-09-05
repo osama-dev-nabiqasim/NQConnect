@@ -70,9 +70,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               SizedBox(height: screenHeight(context) * 0.12),
               // Logo
               Center(
-                child: Icon(
-                  Icons.business,
-                  size: screenHeight(context) * 0.12,
+                child: Image.asset(
+                  "assets/images/NQLogo.png",
+                  height: screenHeight(context) * 0.1,
+                  fit: BoxFit.contain,
                   color: Colors.white,
                 ),
               ),

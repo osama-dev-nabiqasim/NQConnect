@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, deprecated_member_use, unused_local_variable
 
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,21 +14,101 @@ class EnterOtpScreen extends StatefulWidget {
 }
 
 class _EnterOtpScreenState extends State<EnterOtpScreen> {
-  final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _emailotpController = TextEditingController();
+  final TextEditingController _phoneotpController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Timer? _timer;
+  int _secondsRemaining = 30;
+  bool _isResendAvailable = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    setState(() {
+      _secondsRemaining = 30;
+      _isResendAvailable = false;
+    });
+
+    _timer?.cancel();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_secondsRemaining > 0) {
+        setState(() {
+          _secondsRemaining--;
+        });
+      } else {
+        setState(() {
+          _isResendAvailable = true;
+        });
+        timer.cancel();
+      }
+    });
+  }
 
   void _verifyOtp() {
     if (_formKey.currentState!.validate()) {
-      String otp = _otpController.text.trim();
-      // TODO: call your controller logic to verify OTP
-      Get.snackbar(
-        "Success",
-        "OTP Verified Successfully",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-      Get.offNamed("/resetpasswordscreen"); // Navigate to reset password
+      String emailOtp = _emailotpController.text.trim();
+      String phoneOtp = _phoneotpController.text.trim();
+
+      // TODO: Add your OTP verification logic (API/controller call)
+      if (emailOtp == "123456" && phoneOtp == "123456") {
+        Get.snackbar(
+          "Success",
+          "OTP Verified Successfully",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        Get.offNamed("/resetpasswordscreen");
+      } else {
+        Get.snackbar(
+          "Error",
+          "Invalid OTP, please try again",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     }
+  }
+
+  void _resendOtp() {
+    // TODO: Call API to resend OTP
+    Get.snackbar(
+      "OTP Sent",
+      "A new code has been sent to your email and phone number.",
+      backgroundColor: Colors.transparent,
+      colorText: Colors.white,
+      titleText: Text(
+        "OTP Sent",
+        style: TextStyle(
+          color: Colors.black, // ✅ title color black
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+
+      messageText: Text(
+        "A new code has been sent to your email and phone number.",
+        style: TextStyle(
+          color: Colors.black, // ✅ title color black
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
+    );
+
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _emailotpController.dispose();
+    _phoneotpController.dispose();
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -103,7 +184,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            "We have sent a 6-digit code to your email.",
+                            "We have sent a 6-digit code to your email and phone number.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
@@ -112,9 +193,9 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                           ),
                           SizedBox(height: 30),
 
-                          // OTP Input
+                          // Email OTP Input
                           TextFormField(
-                            controller: _otpController,
+                            controller: _emailotpController,
                             keyboardType: TextInputType.number,
                             maxLength: 6,
                             validator: (value) {
@@ -129,7 +210,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                             decoration: InputDecoration(
                               counterText: "",
                               prefixIcon: Icon(Icons.pin, color: Colors.white),
-                              hintText: "Enter Code",
+                              hintText: "Enter Email Code",
                               hintStyle: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
                               ),
@@ -147,6 +228,64 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                               ),
                             ),
                           ),
+                          SizedBox(height: 16),
+
+                          // OTP Input
+                          TextFormField(
+                            controller: _phoneotpController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 6,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Please enter OTP code";
+                              } else if (value.length < 6) {
+                                return "OTP must be 6 digits";
+                              }
+                              return null;
+                            },
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              counterText: "",
+                              prefixIcon: Icon(Icons.pin, color: Colors.white),
+                              hintText: "Enter Phone Number Code",
+                              hintStyle: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.1),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withOpacity(0.3),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+
+                          _isResendAvailable
+                              ? TextButton(
+                                  onPressed: _resendOtp,
+                                  child: Text(
+                                    "Resend Code",
+                                    style: TextStyle(
+                                      color: Colors.yellowAccent,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  "Resend available in $_secondsRemaining s",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14,
+                                  ),
+                                ),
+
                           SizedBox(height: 25),
 
                           // Verify Button

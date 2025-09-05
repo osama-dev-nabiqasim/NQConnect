@@ -159,9 +159,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 right: 20,
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.business,
-                      size: screenHeight * 0.12,
+                    Image.asset(
+                      "assets/images/NQLogo.png",
+                      height: screenHeight * 0.125,
+                      fit: BoxFit.contain,
                       color: Colors.white,
                     ),
                     SizedBox(height: 20),
@@ -249,6 +250,10 @@ class _LoginScreenState extends State<LoginScreen> {
         validator: (value) =>
             value == null || value.isEmpty ? "Employee ID required" : null,
         decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+            borderSide: BorderSide(color: Colors.blue.shade900),
+          ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
           labelText: "Employee ID",
           prefixIcon: Icon(Icons.person_outline),
@@ -268,6 +273,10 @@ class _LoginScreenState extends State<LoginScreen> {
         validator: (value) =>
             value == null || value.isEmpty ? "Password required" : null,
         decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+            borderSide: BorderSide(color: Colors.blue.shade900),
+          ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
           labelText: "Password",
           prefixIcon: Icon(Icons.lock_outline),
