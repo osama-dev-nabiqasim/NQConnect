@@ -6,7 +6,8 @@ import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
 
 class SuggestionListScreen extends StatelessWidget {
-  const SuggestionListScreen({super.key});
+  final SuggestionController controller = Get.put(SuggestionController());
+  SuggestionListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
 

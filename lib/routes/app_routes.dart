@@ -17,7 +17,7 @@ class AppRoutes {
     GetPage(name: '/suggestions', page: () => EmployeeSuggestionFormScreen()),
     GetPage(name: '/resetpasswordscreen', page: () => ResetPasswordScreen()),
 
-    GetPage(name: "/suggestion_list", page: () => const SuggestionListScreen()),
+    GetPage(name: "/suggestion_list", page: () => SuggestionListScreen()),
     GetPage(name: '/dashboard', page: () => DashboardScreen()),
 
     // Employee Routes

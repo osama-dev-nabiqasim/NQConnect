@@ -8,8 +8,7 @@ import 'package:nqconnect/routes/app_routes.dart';
 
 void main() {
   Get.put(UserController(), permanent: true);
-  WidgetsFlutterBinding.ensureInitialized();
-  Get.lazyPut(() => SuggestionController());
+  Get.put(SuggestionController());
   runApp(MyApp());
 }
 
