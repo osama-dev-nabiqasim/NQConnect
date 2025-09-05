@@ -54,11 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
           user["employeeId"]!,
           user["name"]!,
           user["role"]!,
+          user["department"]!,
         );
 
         Get.snackbar(
           "Login Successful",
-          "Welcome, ${user["name"]}",
+          "Welcome, ${user["name"]} (${user["department"]})",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,

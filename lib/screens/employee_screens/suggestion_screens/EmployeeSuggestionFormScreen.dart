@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
+import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
 
 class EmployeeSuggestionFormScreen extends StatefulWidget {
@@ -17,15 +18,12 @@ class EmployeeSuggestionFormScreen extends StatefulWidget {
 class _EmployeeSuggestionFormScreenState
     extends State<EmployeeSuggestionFormScreen> {
   final _descriptionController = TextEditingController();
-  // String? _selectedCategory;
-
   final SuggestionController _controller = Get.find<SuggestionController>();
+  final UserController userController = Get.find<UserController>();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
-  // final TextEditingController _descController = TextEditingController();
   String? _selectedCategory;
   String? _imagePath; // optional
-  // final SuggestionController _controller = Get.find<SuggestionController>();
   final List<String> categories = ["Workplace", "Process", "Team", "Other"];
 
   void _pickImage() async {
@@ -38,11 +36,15 @@ class _EmployeeSuggestionFormScreenState
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       final suggestion = Suggestion(
-        title: _titleController.text,
-        description: _descriptionController.text,
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
         category: _selectedCategory ?? "General",
+        employeeId: userController.employeeId.value, // 👈 Auto from login
+        department: userController.department.value, // 👈 Auto from login
+        createdAt: DateTime.now(),
       );
-
+      print("New Suggestion Added: ${suggestion.toMap()}");
       _controller.addSuggestion(suggestion);
 
       Get.snackbar(
@@ -53,7 +55,7 @@ class _EmployeeSuggestionFormScreenState
         colorText: Colors.white,
       );
 
-      Get.offNamed("/suggestion_list"); // Navigate to list
+      Get.offNamed("/dashboard"); // Navigate to list
     }
   }
 
@@ -109,7 +111,24 @@ class _EmployeeSuggestionFormScreenState
                 child: Form(
                   key: _formKey,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        "Employee ID: ${userController.employeeId.value}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        "Department: ${userController.department.value}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+
                       // Title
                       TextFormField(
                         controller: _titleController,

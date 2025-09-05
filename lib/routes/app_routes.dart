@@ -1,13 +1,14 @@
 // lib/routes/app_routes.dart
 import 'package:get/get.dart';
-import 'package:nqconnect/models/suggestion_list_screen.dart';
+import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/EnterOtpScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/ResetPasswordScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/forgot_password.dart';
 import 'package:nqconnect/screens/dashboard/dashboard_screen.dart';
 import 'package:nqconnect/screens/auth_screens/login_screen.dart';
+import 'package:nqconnect/screens/manager_screens/ApproveRejectScreen.dart';
 import 'package:nqconnect/screens/placeholder_screen.dart';
-import 'package:nqconnect/screens/suggestion_screens/EmployeeSuggestionFormScreen.dart';
+import 'package:nqconnect/screens/employee_screens/suggestion_screens/EmployeeSuggestionFormScreen.dart';
 
 class AppRoutes {
   static final List<GetPage> routes = [
@@ -17,7 +18,7 @@ class AppRoutes {
     GetPage(name: '/suggestions', page: () => EmployeeSuggestionFormScreen()),
     GetPage(name: '/resetpasswordscreen', page: () => ResetPasswordScreen()),
 
-    GetPage(name: "/suggestion_list", page: () => SuggestionListScreen()),
+    // GetPage(name: "/suggestion_list", page: () => SuggestionListScreen()),
     GetPage(name: '/dashboard', page: () => DashboardScreen()),
 
     // Employee Routes
@@ -53,7 +54,12 @@ class AppRoutes {
     ),
     GetPage(
       name: '/approvals',
-      page: () => PlaceholderScreen(title: "Approve / Reject Suggestions"),
+      page: () {
+        final userController = Get.find<UserController>();
+        return ApproveRejectScreen(
+          managerDepartment: userController.department.value,
+        );
+      },
     ),
     GetPage(
       name: '/activity_feed',
