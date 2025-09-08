@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/controllers/dashboard_controller.dart';
 import 'package:nqconnect/models/section_model.dart';
+import 'package:nqconnect/utils/RotatingCircle.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -178,13 +179,21 @@ class DashboardScreen extends StatelessWidget {
           "Dashboard",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
             fontSize: Responsive.font(
               context,
-              Responsive.height(context) * 0.026,
+              Responsive.height(context) * 0.028,
             ),
+            color: Colors.black87, // dark color
+            shadows: [
+              Shadow(
+                offset: Offset(1, 2),
+                blurRadius: 4,
+                color: Colors.black.withOpacity(0.2),
+              ),
+            ],
           ),
         ),
+
         centerTitle: true,
         backgroundColor: Colors.transparent,
       ),
@@ -206,29 +215,21 @@ class DashboardScreen extends StatelessWidget {
 
           // 🔹 Blob Top-Left
           Positioned(
-            top: -80,
+            top: -50,
             left: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
-              ),
+            child: Opacity(
+              opacity: 0.1, // subtle effect
+              child: GradientRotatingCircle(),
             ),
           ),
 
           // 🔹 Blob Bottom-Right
           Positioned(
-            bottom: -100,
-            right: -60,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black.withOpacity(0.04),
-              ),
+            bottom: -50,
+            right: -50,
+            child: Opacity(
+              opacity: 0.05, // subtle effect
+              child: GradientRotatingCircle(),
             ),
           ),
 
