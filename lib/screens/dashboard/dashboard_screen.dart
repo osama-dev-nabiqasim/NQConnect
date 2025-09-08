@@ -38,71 +38,90 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionCard(BuildContext context, Section section) {
+  Widget _buildSectionCard(BuildContext context, Section section, int index) {
     final bool isLargeScreen = Responsive.width(context) > 600;
-    return GestureDetector(
-      onTap: () {
-        if (section.name == "Logout") {
-          _logout(context);
-        } else {
-          Get.toNamed(section.route);
-        }
-      },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // 👈 glass blur
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
 
-              gradient: LinearGradient(
-                colors: [
-                  Colors.blue.shade900.withOpacity(0.9), // 👈 transparency
-                  Colors.blue.shade700.withOpacity(0.4),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2), // 👈 frosted border
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  offset: Offset(6, 6),
-                  blurRadius: 10,
-                ),
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.3),
-                  offset: Offset(-6, -6),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(Responsive.width(context) * 0.05),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    section.icon,
-                    size: isLargeScreen ? 70 : 50,
-                    color: Colors.white,
+    final isCircle = section.name == "Tasks" || section.name == "Suggestions";
+    final isWide = section.name == "Logout" || section.name == "Overview";
+
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 400 + (index * 100)),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 50 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: () {
+          if (section.name == "Logout") {
+            _logout(context);
+          } else {
+            Get.toNamed(section.route);
+          }
+        },
+        child: AnimatedScale(
+          duration: Duration(milliseconds: 200),
+          scale: 1.0,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              splashColor: Colors.white24,
+              borderRadius: BorderRadius.circular(isCircle ? 100 : 20),
+              child: Container(
+                width: isWide ? double.infinity : null,
+                height: isCircle ? 100 : null,
+                padding: EdgeInsets.all(Responsive.width(context) * 0.05),
+                decoration: BoxDecoration(
+                  shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
+                  borderRadius: isCircle ? null : BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF14B8A6).withOpacity(0.9), // Teal
+                      Color(0xFF4DD0E1).withOpacity(0.6), // Light Cyan
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  SizedBox(height: Responsive.height(context) * 0.012),
-                  Text(
-                    section.name,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: Responsive.font(context, 16),
-                      fontWeight: FontWeight.bold,
+                  border: Border.all(
+                    color: Colors.teal.withOpacity(0.3),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      offset: Offset(2, 4),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      section.icon,
+                      size: isLargeScreen ? 70 : 50,
                       color: Colors.white,
                     ),
-                  ),
-                ],
+                    if (!isCircle) ...[
+                      SizedBox(height: 8),
+                      Text(
+                        section.name,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: Responsive.font(context, 16),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87, // Dark text for light theme
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -117,39 +136,44 @@ class DashboardScreen extends StatelessWidget {
     List<Widget> children = [];
     for (int i = 0; i < sections.length; i++) {
       final sec = sections[i];
-      if (sec.fullWidth) {
-        // Full width section
-        children.add(_buildSectionCard(context, sec));
+      if (sec.fullWidth || sec.name == "Logout" || sec.name == "Overview") {
+        children.add(_buildSectionCard(context, sec, i));
         children.add(SizedBox(height: Responsive.height(context) * 0.016));
       } else {
-        // Pair side by side (except logout if last)
-        if (i + 1 < sections.length && !sections[i + 1].fullWidth) {
+        if (i + 1 < sections.length &&
+            !sections[i + 1].fullWidth &&
+            sections[i + 1].name != "Logout" &&
+            sections[i + 1].name != "Overview") {
           children.add(
             Row(
               children: [
-                Expanded(child: _buildSectionCard(context, sec)),
+                Expanded(child: _buildSectionCard(context, sec, i)),
                 SizedBox(width: Responsive.width(context) * 0.04),
-                Expanded(child: _buildSectionCard(context, sections[i + 1])),
+                Expanded(
+                  child: _buildSectionCard(context, sections[i + 1], i + 1),
+                ),
               ],
             ),
           );
           children.add(SizedBox(height: Responsive.height(context) * 0.016));
-          i++; // skip next
+          i++;
         } else {
-          children.add(_buildSectionCard(context, sec));
+          children.add(_buildSectionCard(context, sec, i));
           children.add(SizedBox(height: Responsive.height(context) * 0.016));
         }
       }
     }
-
     return Column(children: children);
   }
 
   @override
   Widget build(BuildContext context) {
     final role = userController.role.value;
+    final department = userController.department.value;
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        elevation: 0,
         title: Text(
           "Dashboard",
           style: TextStyle(
@@ -157,16 +181,130 @@ class DashboardScreen extends StatelessWidget {
             color: Colors.white,
             fontSize: Responsive.font(
               context,
-              Responsive.height(context) * 0.030,
+              Responsive.height(context) * 0.026,
             ),
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: Colors.transparent,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(Responsive.width(context) * 0.04),
-        child: _buildRoleBasedLayout(context, role),
+      body: Stack(
+        children: [
+          // 🔹 Background Gradient
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 181, 181, 181), // near white
+                  Color(0xFFF4F6F9), // light greyish
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+
+          // 🔹 Blob Top-Left
+          Positioned(
+            top: -80,
+            left: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
+              ),
+            ),
+          ),
+
+          // 🔹 Blob Bottom-Right
+          Positioned(
+            bottom: -100,
+            right: -60,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black.withOpacity(0.04),
+              ),
+            ),
+          ),
+
+          // 🔹 Foreground content
+          Column(
+            children: [
+              // Welcome Banner (fixed)
+              // 🔹 Welcome Banner (Glassy Look)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                    sigmaX: 10,
+                    sigmaY: 10,
+                  ), // blur effect
+                  child: Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.only(
+                      top: 86,
+                      left: 16,
+                      right: 16,
+                      bottom: 12,
+                    ),
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.white.withOpacity(
+                        0.45,
+                      ), // glassy transparency
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3), // subtle border
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "👋 Welcome ${userController.userName.value},",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "$role • $department",
+                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Scrollable content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Responsive.width(context) * 0.04,
+                    vertical: 10,
+                  ),
+                  child: _buildRoleBasedLayout(context, role),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

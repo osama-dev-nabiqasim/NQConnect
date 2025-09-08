@@ -1,0 +1,67 @@
+// ignore_for_file: dead_code
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:nqconnect/controllers/suggestion_controller.dart';
+import 'package:nqconnect/controllers/user_controller.dart';
+
+class MySuggestionsScreen extends StatelessWidget {
+  final SuggestionController suggestionController =
+      Get.find<SuggestionController>();
+  final UserController userController = Get.find<UserController>();
+
+  MySuggestionsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("My Suggestions"),
+        backgroundColor: Colors.transparent,
+      ),
+      body: Obx(() {
+        // filter only current employee’s suggestions
+        final mySuggestions = suggestionController.suggestions
+            .where((s) => s.employeeId == userController.employeeId.value)
+            .toList();
+
+        if (mySuggestions.isEmpty) {
+          return Center(child: Text("No suggestions submitted yet."));
+        }
+
+        return ListView.builder(
+          itemCount: mySuggestions.length,
+          itemBuilder: (context, index) {
+            final suggestion = mySuggestions[index];
+            return Card(
+              margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              elevation: 2,
+              child: ListTile(
+                title: Text(suggestion.title),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(suggestion.description),
+                    SizedBox(height: 5),
+                    Text("Category: ${suggestion.category}"),
+                    Text(
+                      "Status: ${suggestion.status ?? "Pending"}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: suggestion.status == "Approved"
+                            ? Colors.green
+                            : suggestion.status == "Rejected"
+                            ? Colors.red
+                            : Colors.orange,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }),
+    );
+  }
+}

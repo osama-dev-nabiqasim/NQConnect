@@ -6,6 +6,7 @@ import 'package:nqconnect/screens/auth_screens/reset_password_screens/ResetPassw
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/forgot_password.dart';
 import 'package:nqconnect/screens/dashboard/dashboard_screen.dart';
 import 'package:nqconnect/screens/auth_screens/login_screen.dart';
+import 'package:nqconnect/screens/employee_screens/suggestion_screens/MySuggestionsScreen.dart';
 import 'package:nqconnect/screens/manager_screens/ApproveRejectScreen.dart';
 import 'package:nqconnect/screens/placeholder_screen.dart';
 import 'package:nqconnect/screens/employee_screens/suggestion_screens/EmployeeSuggestionFormScreen.dart';
@@ -38,7 +39,7 @@ class AppRoutes {
       name: '/votes',
       page: () => PlaceholderScreen(title: "Vote on Suggestions"),
     ),
-
+    GetPage(name: '/my_suggestions', page: () => MySuggestionsScreen()),
     // Manager Routes
     GetPage(
       name: '/team_overview',
