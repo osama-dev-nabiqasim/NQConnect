@@ -1,0 +1,184 @@
+// lib/screens/vote_on_suggestion_screen.dart
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:nqconnect/controllers/suggestion_controller.dart';
+import 'package:nqconnect/models/suggestion_model.dart';
+
+class VoteOnSuggestionScreen extends StatefulWidget {
+  const VoteOnSuggestionScreen({super.key});
+
+  @override
+  State<VoteOnSuggestionScreen> createState() => _VoteOnSuggestionScreenState();
+}
+
+class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
+  final SuggestionController suggestionController =
+      Get.find<SuggestionController>();
+
+  // Map to track votes per suggestion (local state for now)
+  final Map<String, String> userVotes = {}; // {suggestionId: "like"/"dislike"}
+  final Map<String, int> likeCounts = {};
+  final Map<String, int> dislikeCounts = {};
+
+  void _vote(Suggestion suggestion, String type) {
+    final id = suggestion.id;
+    setState(() {
+      // Reset previous vote if exists
+      if (userVotes[id] == "like") {
+        likeCounts[id] = (likeCounts[id] ?? 0) - 1;
+      } else if (userVotes[id] == "dislike") {
+        dislikeCounts[id] = (dislikeCounts[id] ?? 0) - 1;
+      }
+
+      // Apply new vote
+      userVotes[id] = type;
+      if (type == "like") {
+        likeCounts[id] = (likeCounts[id] ?? 0) + 1;
+      } else {
+        dislikeCounts[id] = (dislikeCounts[id] ?? 0) + 1;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Vote on Suggestions",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue.shade900,
+      ),
+      body: Obx(() {
+        final approvedSuggestions = suggestionController.suggestions
+            .where((s) => s.status == "Approved")
+            .toList();
+
+        if (approvedSuggestions.isEmpty) {
+          return const Center(child: Text("No approved suggestions yet."));
+        }
+
+        return ListView.builder(
+          itemCount: approvedSuggestions.length,
+          padding: const EdgeInsets.all(12),
+          itemBuilder: (context, index) {
+            final suggestion = approvedSuggestions[index];
+            final likes = likeCounts[suggestion.id] ?? 0;
+            final dislikes = dislikeCounts[suggestion.id] ?? 0;
+            final totalVotes = (likes + dislikes) == 0 ? 1 : (likes + dislikes);
+            final likePercent = likes / totalVotes;
+
+            return Card(
+              elevation: 3,
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.all(12),
+                title: Text(
+                  suggestion.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Category: ${suggestion.category}"),
+                    const SizedBox(height: 8),
+                    // progress bar
+                    LinearProgressIndicator(
+                      value: likePercent,
+                      minHeight: 6,
+                      backgroundColor: Colors.red.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.green.shade600,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    const SizedBox(height: 4),
+                    Text("👍 $likes   👎 $dislikes"),
+                  ],
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(suggestion.description),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Department: ${suggestion.department}",
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                        Text(
+                          "Created: ${suggestion.createdAt.toLocal().toString().split(' ')[0]}",
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                        if (suggestion.image != null) ...[
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              suggestion.image!,
+                              height: 120,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () => _vote(suggestion, "like"),
+                              icon: const Icon(Icons.thumb_up),
+                              label: const Text("Like"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    userVotes[suggestion.id] == "like"
+                                    ? Colors.green
+                                    : Colors.grey.shade200,
+                                foregroundColor:
+                                    userVotes[suggestion.id] == "like"
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () => _vote(suggestion, "dislike"),
+                              icon: const Icon(Icons.thumb_down),
+                              label: const Text("Dislike"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    userVotes[suggestion.id] == "dislike"
+                                    ? Colors.red
+                                    : Colors.grey.shade200,
+                                foregroundColor:
+                                    userVotes[suggestion.id] == "dislike"
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }),
+    );
+  }
+}

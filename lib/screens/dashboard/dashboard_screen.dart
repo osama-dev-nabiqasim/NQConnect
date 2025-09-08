@@ -104,10 +104,20 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      section.icon,
-                      size: isLargeScreen ? 70 : 50,
-                      color: Colors.white,
+                    ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [
+                          Color.fromARGB(255, 202, 202, 202),
+                          Color.fromARGB(255, 255, 255, 255),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).createShader(bounds),
+                      child: Icon(
+                        section.icon,
+                        size: isLargeScreen ? 70 : 50,
+                        color: Colors.white, // Required for ShaderMask
+                      ),
                     ),
                     if (!isCircle) ...[
                       SizedBox(height: 8),

@@ -16,8 +16,18 @@ class MySuggestionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("My Suggestions"),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.blue.shade900,
+
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+        title: Text(
+          "My Suggestions",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
       ),
       body: Obx(() {
         // filter only current employee’s suggestions

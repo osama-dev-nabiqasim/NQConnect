@@ -75,7 +75,7 @@ class DummyDB {
       "employeeId": "admin",
       "password": "12345",
       "role": "admin",
-      "name": "Admin Qasim",
+      "name": "Admin",
       "department": "All",
     },
   ];
