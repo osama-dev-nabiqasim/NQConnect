@@ -134,8 +134,13 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.center,
-            radius: 1.4,
-            colors: [Colors.blue.shade900, Colors.blue.shade400],
+            radius: 1.6,
+            colors: [
+              const Color.fromARGB(255, 87, 103, 116), // near white
+              Color(0xFFF4F6F9), // light greyish
+            ],
+            // begin: Alignment.topLeft,
+            // end: Alignment.bottomRight,
           ),
         ),
         child: SingleChildScrollView(

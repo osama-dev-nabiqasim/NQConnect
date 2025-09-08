@@ -109,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // Top Gradient Background
               Container(
-                height: screenHeight / 2.5,
+                height: screenHeight / 2.6,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
