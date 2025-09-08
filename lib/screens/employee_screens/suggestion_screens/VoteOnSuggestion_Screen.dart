@@ -15,10 +15,8 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
   final SuggestionController suggestionController =
       Get.find<SuggestionController>();
 
-  // Map to track votes per suggestion (local state for now)
+  // Track user vote locally
   final Map<String, String> userVotes = {}; // {suggestionId: "like"/"dislike"}
-  final Map<String, int> likeCounts = {};
-  final Map<String, int> dislikeCounts = {};
 
   void _vote(Suggestion suggestion, String type) {
     setState(() {
@@ -52,10 +50,6 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
           padding: const EdgeInsets.all(12),
           itemBuilder: (context, index) {
             final suggestion = approvedSuggestions[index];
-            final likes = likeCounts[suggestion.id] ?? 0;
-            final dislikes = dislikeCounts[suggestion.id] ?? 0;
-            final totalVotes = (likes + dislikes) == 0 ? 1 : (likes + dislikes);
-            final likePercent = likes / totalVotes;
 
             return Card(
               elevation: 3,
@@ -72,25 +66,7 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                     fontSize: 16,
                   ),
                 ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Category: ${suggestion.category}"),
-                    const SizedBox(height: 8),
-                    // progress bar
-                    LinearProgressIndicator(
-                      value: likePercent,
-                      minHeight: 6,
-                      backgroundColor: Colors.red.withOpacity(0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.green.shade600,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    const SizedBox(height: 4),
-                    Text("👍 $likes   👎 $dislikes"),
-                  ],
-                ),
+                subtitle: Text("Category: ${suggestion.category}"),
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
