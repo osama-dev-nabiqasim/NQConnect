@@ -246,7 +246,6 @@ class DashboardScreen extends StatelessWidget {
           // 🔹 Foreground content
           Column(
             children: [
-              // Welcome Banner (fixed)
               // 🔹 Welcome Banner (Glassy Look)
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
@@ -258,24 +257,27 @@ class DashboardScreen extends StatelessWidget {
                   child: Container(
                     width: double.infinity,
                     margin: EdgeInsets.only(
-                      top: 86,
-                      left: 16,
-                      right: 16,
-                      bottom: 12,
+                      top: screenHeight(context) * 0.13,
+                      left: screenWidth(context) * 0.025,
+                      right: screenWidth(context) * 0.025,
+                      bottom: screenHeight(context) * 0.014,
                     ),
                     padding: EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: Colors.white.withOpacity(
-                        0.45,
-                      ), // glassy transparency
+                      color: const Color.fromARGB(
+                        0,
+                        255,
+                        255,
+                        255,
+                      ).withOpacity(0.25), // glassy transparency
                       border: Border.all(
                         color: Colors.white.withOpacity(0.3), // subtle border
                         width: 1.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withOpacity(0.0),
                           blurRadius: 10,
                           offset: Offset(0, 4),
                         ),

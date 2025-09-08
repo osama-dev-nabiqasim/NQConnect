@@ -21,23 +21,10 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
   final Map<String, int> dislikeCounts = {};
 
   void _vote(Suggestion suggestion, String type) {
-    final id = suggestion.id;
     setState(() {
-      // Reset previous vote if exists
-      if (userVotes[id] == "like") {
-        likeCounts[id] = (likeCounts[id] ?? 0) - 1;
-      } else if (userVotes[id] == "dislike") {
-        dislikeCounts[id] = (dislikeCounts[id] ?? 0) - 1;
-      }
-
-      // Apply new vote
-      userVotes[id] = type;
-      if (type == "like") {
-        likeCounts[id] = (likeCounts[id] ?? 0) + 1;
-      } else {
-        dislikeCounts[id] = (dislikeCounts[id] ?? 0) + 1;
-      }
+      userVotes[suggestion.id] = type;
     });
+    suggestionController.voteOnSuggestion(suggestion.id, type);
   }
 
   @override

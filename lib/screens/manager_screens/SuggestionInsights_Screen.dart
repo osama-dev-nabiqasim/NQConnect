@@ -1,8 +1,10 @@
+// lib/screens/suggestion_insights_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
+import 'package:nqconnect/models/suggestion_model.dart';
 
 class SuggestionInsightsScreen extends StatelessWidget {
   final SuggestionController suggestionController =
@@ -13,7 +15,7 @@ class SuggestionInsightsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final department = userController.department.value;
+    final String managerDept = userController.department.value;
 
     return Scaffold(
       appBar: AppBar(
@@ -25,30 +27,25 @@ class SuggestionInsightsScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Obx(() {
-        final departmentSuggestions = suggestionController
-            .getDepartmentSuggestions(department)
-            .where((s) => s.status == "Approved")
+        final deptSuggestions = suggestionController
+            .getDepartmentSuggestions(managerDept)
+            .where((s) => s.status == "Approved") // sirf approved
             .toList();
 
-        if (departmentSuggestions.isEmpty) {
+        if (deptSuggestions.isEmpty) {
           return const Center(
-            child: Text("No approved suggestions for your department yet."),
+            child: Text("No suggestions for your department yet."),
           );
         }
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: departmentSuggestions.length,
+          itemCount: deptSuggestions.length,
           itemBuilder: (context, index) {
-            final suggestion = departmentSuggestions[index];
-
-            // Dummy votes (replace later with DB/API)
-            final likes = (index + 1) * 4;
-            final dislikes = (index + 1) * 2;
-            final maxVotes = (likes > dislikes ? likes : dislikes) + 2;
+            final Suggestion suggestion = deptSuggestions[index];
 
             return Card(
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -61,48 +58,33 @@ class SuggestionInsightsScreen extends StatelessWidget {
                     Text(
                       suggestion.title,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
                         fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       suggestion.description,
-                      style: const TextStyle(color: Colors.black54),
+                      style: const TextStyle(color: Colors.black87),
                     ),
                     const SizedBox(height: 16),
 
+                    // 🔹 Chart
                     SizedBox(
-                      height: 200,
+                      height: 180,
                       child: BarChart(
                         BarChartData(
-                          barGroups: [
-                            BarChartGroupData(
-                              x: 0,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: likes.toDouble(),
-                                  color: Colors.green,
-                                  width: 25,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              ],
-                              showingTooltipIndicators: [0],
-                            ),
-                            BarChartGroupData(
-                              x: 1,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: dislikes.toDouble(),
-                                  color: Colors.red,
-                                  width: 25,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              ],
-                              showingTooltipIndicators: [0],
-                            ),
-                          ],
+                          alignment: BarChartAlignment.spaceAround,
+                          maxY:
+                              (suggestion.likes > suggestion.dislikes
+                                  ? suggestion.likes.toDouble()
+                                  : suggestion.dislikes.toDouble()) +
+                              2,
+                          barTouchData: BarTouchData(enabled: true),
                           titlesData: FlTitlesData(
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: true),
+                            ),
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
@@ -112,31 +94,47 @@ class SuggestionInsightsScreen extends StatelessWidget {
                                       return const Text("👍 Likes");
                                     case 1:
                                       return const Text("👎 Dislikes");
+                                    default:
+                                      return const Text("");
                                   }
-                                  return const Text("");
                                 },
                               ),
                             ),
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: true),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
                           ),
                           borderData: FlBorderData(show: false),
-                          gridData: FlGridData(show: true),
-                          maxY: maxVotes.toDouble(),
+                          barGroups: [
+                            BarChartGroupData(
+                              x: 0,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: suggestion.likes.toDouble(),
+                                  color: Colors.green,
+                                  width: 28,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ],
+                            ),
+                            BarChartGroupData(
+                              x: 1,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: suggestion.dislikes.toDouble(),
+                                  color: Colors.red,
+                                  width: 28,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
 
                     const SizedBox(height: 12),
-                    Text("👍 Likes: $likes"),
-                    Text("👎 Dislikes: $dislikes"),
+                    Text(
+                      "👍 ${suggestion.likes}   👎 ${suggestion.dislikes}",
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                   ],
                 ),
               ),

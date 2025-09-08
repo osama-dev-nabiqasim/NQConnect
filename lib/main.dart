@@ -2,13 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/routes/app_routes.dart';
 
-void main() {
+void main() async {
   Get.put(UserController(), permanent: true);
   Get.put(SuggestionController());
+  await GetStorage.init();
   runApp(MyApp());
 }
 

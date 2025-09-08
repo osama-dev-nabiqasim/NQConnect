@@ -10,6 +10,10 @@ class Suggestion {
   final DateTime createdAt; // Date of suggestion
   String status; // Pending / Approved / Rejected
 
+  // For voting functionality
+  int likes;
+  int dislikes;
+
   Suggestion({
     required this.id,
     required this.title,
@@ -20,6 +24,8 @@ class Suggestion {
     required this.department,
     required this.createdAt,
     this.status = "Pending",
+    this.likes = 0,
+    this.dislikes = 0,
   });
 
   // Convert to Map (useful for DB or API)
@@ -34,6 +40,8 @@ class Suggestion {
       "department": department,
       "createdAt": createdAt.toIso8601String(),
       "status": status,
+      "likes": likes,
+      "dislikes": dislikes,
     };
   }
 
@@ -49,6 +57,8 @@ class Suggestion {
       department: map["department"],
       createdAt: DateTime.parse(map["createdAt"]),
       status: map["status"] ?? "Pending",
+      likes: map["likes"] ?? 0,
+      dislikes: map["dislikes"] ?? 0,
     );
   }
 }
