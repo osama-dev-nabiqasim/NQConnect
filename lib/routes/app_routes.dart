@@ -1,6 +1,7 @@
 // lib/routes/app_routes.dart
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
+import 'package:nqconnect/screens/admin_screens/AnalyticsScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/EnterOtpScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/ResetPasswordScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/forgot_password.dart';
@@ -72,10 +73,7 @@ class AppRoutes {
     ),
 
     // ----------------------------Admin Routes----------------------------
-    GetPage(
-      name: '/suggestion_overview',
-      page: () => PlaceholderScreen(title: "System Overview / Analytics"),
-    ),
+    GetPage(name: '/suggestion_overview', page: () => AnalyticsDashboard()),
     GetPage(
       name: '/task_overview',
       page: () => PlaceholderScreen(title: "Task Overview"),

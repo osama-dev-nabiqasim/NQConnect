@@ -63,4 +63,21 @@ class SuggestionController extends GetxController {
           .toList();
     }
   }
+
+  int getTotalPending() =>
+      suggestions.where((s) => s.status == "Pending").length;
+  int getTotalApproved() =>
+      suggestions.where((s) => s.status == "Approved").length;
+  int getTotalRejected() =>
+      suggestions.where((s) => s.status == "Rejected").length;
+  String getTopDepartment() {
+    final deptVotes = <String, int>{};
+    for (var s in suggestions) {
+      if (s.status == "Approved") {
+        deptVotes[s.department] = (deptVotes[s.department] ?? 0) + s.likes;
+      }
+    }
+    if (deptVotes.isEmpty) return "N/A";
+    return deptVotes.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+  }
 }
