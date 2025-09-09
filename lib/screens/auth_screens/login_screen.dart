@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/data/dummy_db.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -306,19 +307,8 @@ class _LoginScreenState extends State<LoginScreen> {
           width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
             gradient: isButtonEnabled
-                ? LinearGradient(
-                    colors: [
-                      Colors.blue.shade900.withOpacity(0.9), // 👈 transparency
-                      Colors.blue.shade400.withOpacity(0.9),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : LinearGradient(
-                    colors: [Colors.grey.shade500, Colors.grey.shade400],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                ? AppColors.buttonPrimaryLinearGradient
+                : AppColors.buttonDisabledLinearGradient,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(

@@ -24,7 +24,7 @@ class AppRoutes {
     // GetPage(name: "/suggestion_list", page: () => SuggestionListScreen()),
     GetPage(name: '/dashboard', page: () => DashboardScreen()),
 
-    // Employee Routes
+    // --------------------Employee Routes------------------------------------------
     GetPage(
       name: '/employee_overview',
       page: () => PlaceholderScreen(title: "Employee Overview"),
@@ -40,7 +40,7 @@ class AppRoutes {
     GetPage(name: '/votes', page: () => VoteOnSuggestionScreen()),
     GetPage(name: '/my_suggestions', page: () => MySuggestionsScreen()),
 
-    // Manager Routes
+    // -------------------Manager Routes---------------------------------------------
     GetPage(
       name: '/team_overview',
       page: () => PlaceholderScreen(title: "Team Performance Overview"),
@@ -71,7 +71,7 @@ class AppRoutes {
       page: () => PlaceholderScreen(title: "Notifications"),
     ),
 
-    // Admin Routes
+    // ----------------------------Admin Routes----------------------------
     GetPage(
       name: '/suggestion_overview',
       page: () => PlaceholderScreen(title: "System Overview / Analytics"),

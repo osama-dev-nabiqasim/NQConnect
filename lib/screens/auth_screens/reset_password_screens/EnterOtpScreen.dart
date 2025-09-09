@@ -301,10 +301,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                               padding: EdgeInsets.symmetric(vertical: 14),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [
-                                    Colors.blue.shade800,
-                                    Colors.blue.shade600,
-                                  ],
+                                  colors: AppColors.buttonPrimary,
                                 ),
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [

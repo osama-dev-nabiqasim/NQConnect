@@ -32,7 +32,7 @@ class DashboardScreen extends StatelessWidget {
               );
               Get.offAllNamed('/login');
             },
-            child: Text("Yes"),
+            child: Text("Yes", style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
@@ -81,21 +81,14 @@ class DashboardScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
                   borderRadius: isCircle ? null : BorderRadius.circular(20),
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF14B8A6).withOpacity(0.9), // Teal
-                      Color(0xFF4DD0E1).withOpacity(0.6), // Light Cyan
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: AppColors.secondaryLinearGradient,
                   border: Border.all(
-                    color: Colors.teal.withOpacity(0.3),
+                    color: Colors.black.withOpacity(0.3),
                     width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withOpacity(0.15),
                       offset: Offset(2, 4),
                       blurRadius: 8,
                     ),
@@ -213,12 +206,9 @@ class DashboardScreen extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color.fromARGB(255, 181, 181, 181), // near white
-                  Color(0xFFF4F6F9), // light greyish
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                colors: AppColors.backgroundColor,
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
               ),
             ),
           ),
@@ -272,7 +262,7 @@ class DashboardScreen extends StatelessWidget {
                         255,
                       ).withOpacity(0.25), // glassy transparency
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3), // subtle border
+                        color: Colors.white.withOpacity(0.4), // subtle border
                         width: 1.2,
                       ),
                       boxShadow: [
