@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 class ApproveRejectScreen extends StatelessWidget {
   final String managerDepartment;
@@ -14,7 +15,7 @@ class ApproveRejectScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Approve / Reject Suggestions"),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: AppColors.appbarColor[0],
         centerTitle: true,
       ),
       body: Obx(() {

@@ -16,8 +16,7 @@ double screenWidth(BuildContext context) => MediaQuery.of(context).size.height;
 
 class AppColors {
   static List<Color> get appbarColor => [
-    Colors.blue.shade900,
-    Colors.blue.shade700,
+    const Color(0xFF0072CF),
     Colors.blue.shade500.withOpacity(0.6),
   ];
 

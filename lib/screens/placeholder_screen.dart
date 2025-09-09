@@ -1,6 +1,7 @@
 // lib/screens/placeholder_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 class PlaceholderScreen extends StatelessWidget {
   final String title;
@@ -11,7 +12,7 @@ class PlaceholderScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title, style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: AppColors.appbarColor[0],
         centerTitle: true,
       ),
       body: Center(

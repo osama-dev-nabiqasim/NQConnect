@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 class MySuggestionsScreen extends StatelessWidget {
   final SuggestionController suggestionController =
@@ -16,8 +17,7 @@ class MySuggestionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade900,
-
+        backgroundColor: AppColors.appbarColor[0],
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),

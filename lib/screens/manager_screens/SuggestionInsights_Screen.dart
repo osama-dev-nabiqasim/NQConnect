@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 class SuggestionInsightsScreen extends StatelessWidget {
   final SuggestionController suggestionController =
@@ -23,7 +24,7 @@ class SuggestionInsightsScreen extends StatelessWidget {
           "Suggestion Insights",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: AppColors.appbarColor[0],
         centerTitle: true,
       ),
       body: Obx(() {

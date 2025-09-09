@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 class EmployeeSuggestionFormScreen extends StatefulWidget {
   const EmployeeSuggestionFormScreen({super.key});
@@ -64,8 +65,7 @@ class _EmployeeSuggestionFormScreenState
     return Scaffold(
       // extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade900,
-
+        backgroundColor: AppColors.appbarColor[0],
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),

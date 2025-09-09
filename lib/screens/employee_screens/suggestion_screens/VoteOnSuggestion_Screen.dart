@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 class VoteOnSuggestionScreen extends StatefulWidget {
   const VoteOnSuggestionScreen({super.key});
@@ -34,7 +35,7 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: AppColors.appbarColor[0],
       ),
       body: Obx(() {
         final approvedSuggestions = suggestionController.suggestions
