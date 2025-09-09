@@ -38,6 +38,7 @@ class _EmployeeSuggestionFormScreenState
     if (_formKey.currentState!.validate()) {
       final suggestion = Suggestion(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
+        employeeName: userController.userName.value,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         category: _selectedCategory ?? "General",

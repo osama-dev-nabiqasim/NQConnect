@@ -2,6 +2,7 @@
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/screens/admin_screens/AnalyticsScreen.dart';
+import 'package:nqconnect/screens/admin_screens/SuggestionManagementScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/EnterOtpScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/ResetPasswordScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/forgot_password.dart';
@@ -80,7 +81,7 @@ class AppRoutes {
     ),
     GetPage(
       name: '/suggestion_management',
-      page: () => PlaceholderScreen(title: "Suggestion Management"),
+      page: () => SuggestionManagementScreen(),
     ),
     GetPage(
       name: '/innovation_analytics',
