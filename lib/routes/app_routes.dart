@@ -14,9 +14,11 @@ import 'package:nqconnect/screens/manager_screens/ApproveRejectScreen.dart';
 import 'package:nqconnect/screens/manager_screens/SuggestionInsights_Screen.dart';
 import 'package:nqconnect/screens/placeholder_screen.dart';
 import 'package:nqconnect/screens/employee_screens/suggestion_screens/EmployeeSuggestionFormScreen.dart';
+import 'package:nqconnect/screens/splash_screen.dart';
 
 class AppRoutes {
   static final List<GetPage> routes = [
+    GetPage(name: '/splash', page: () => const SplashScreen()),
     GetPage(name: '/login', page: () => LoginScreen()),
     GetPage(name: '/forgotpassword', page: () => ForgotPasswordScreen()),
     GetPage(name: '/enterotpscreen', page: () => EnterOtpScreen()),
