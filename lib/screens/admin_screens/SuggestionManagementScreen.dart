@@ -1,3 +1,5 @@
+// ignore_for_file: sort_child_properties_last
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_management_controller.dart';
@@ -44,7 +46,6 @@ class SuggestionManagementScreen extends StatelessWidget {
       body: Column(
         children: [
           _buildFilterSection(context),
-          // Bulk action bar with proper Obx
           Obx(() {
             if (controller.isSelecting.value) {
               return _buildBulkActionBar();
