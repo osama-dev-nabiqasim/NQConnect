@@ -1,12 +1,14 @@
 // ignore_for_file: file_names, prefer_const_constructors, deprecated_member_use
 
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nqconnect/controllers/suggestion_controller.dart';
+import 'package:http/http.dart' as http;
 import 'package:nqconnect/controllers/user_controller.dart';
-import 'package:nqconnect/models/suggestion_model.dart';
 import 'package:nqconnect/utils/responsive.dart';
+
+import '../../../controllers/suggestion_controller.dart';
 
 class EmployeeSuggestionFormScreen extends StatefulWidget {
   const EmployeeSuggestionFormScreen({super.key});
@@ -19,7 +21,6 @@ class EmployeeSuggestionFormScreen extends StatefulWidget {
 class _EmployeeSuggestionFormScreenState
     extends State<EmployeeSuggestionFormScreen> {
   final _descriptionController = TextEditingController();
-  final SuggestionController _controller = Get.find<SuggestionController>();
   final UserController userController = Get.find<UserController>();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
@@ -34,30 +35,51 @@ class _EmployeeSuggestionFormScreenState
     });
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final suggestion = Suggestion(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        employeeName: userController.userName.value,
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        category: _selectedCategory ?? "General",
-        employeeId: userController.employeeId.value, // 👈 Auto from login
-        department: userController.department.value, // 👈 Auto from login
-        createdAt: DateTime.now(),
-      );
-      print("New Suggestion Added: ${suggestion.toMap()}");
-      _controller.addSuggestion(suggestion);
+      try {
+        // 👇 Prepare data for API
+        final data = {
+          'title': _titleController.text.trim(),
+          'description': _descriptionController.text.trim(),
+          'category': _selectedCategory ?? "Workplace",
+          'employee_id': userController.employeeId.value,
+          'employee_name': userController.userName.value,
+          'department': userController.department.value,
+        };
+        print('✅ SUBMIT DATA: $data');
 
-      Get.snackbar(
-        "Success",
-        "Suggestion sent for review",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+        // 👇 Call backend API (you need to implement this in ApiService)
+        final response = await http.post(
+          Uri.parse(
+            'http://10.0.2.2:5000/api/suggestions',
+          ), // 👈 Your backend URL
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(data),
+        );
 
-      Get.offNamed("/dashboard"); // Navigate to list
+        print('✅ RESPONSE STATUS: ${response.statusCode}'); // 👈 DEBUG
+        print('✅ RESPONSE BODY: ${response.body}'); // 👈 DEBUG
+
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          Get.snackbar(
+            "Success",
+            "Suggestion sent for review",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+
+          final suggestionController = Get.find<SuggestionController>();
+          await suggestionController.fetchSuggestions();
+
+          Get.offNamed("/my_suggestions"); // Navigate to list
+        } else {
+          Get.snackbar("Error", "Failed to submit suggestion");
+        }
+      } catch (e) {
+        Get.snackbar("Error", "Network error: $e");
+      }
     }
   }
 

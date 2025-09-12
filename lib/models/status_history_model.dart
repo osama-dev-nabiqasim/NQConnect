@@ -15,18 +15,18 @@ class StatusHistory {
   Map<String, dynamic> toMap() {
     return {
       'status': status,
-      'changedBy': changedBy,
-      'changedAt': changedAt.toIso8601String(),
+      'changed_by': changedBy,
+      'changed_at': changedAt.toIso8601String(),
       'comments': comments,
     };
   }
 
-  factory StatusHistory.fromMap(Map<String, dynamic> map) {
+  factory StatusHistory.fromJson(Map<String, dynamic> json) {
     return StatusHistory(
-      status: map['status'],
-      changedBy: map['changedBy'],
-      changedAt: DateTime.parse(map['changedAt']),
-      comments: map['comments'],
+      status: json['status'],
+      changedBy: json['changed_by'],
+      changedAt: DateTime.parse(json['changed_at']),
+      comments: json['comments'],
     );
   }
 }

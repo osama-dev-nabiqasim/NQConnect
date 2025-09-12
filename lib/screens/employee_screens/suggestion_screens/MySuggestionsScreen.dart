@@ -30,11 +30,19 @@ class MySuggestionsScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Obx(() {
+        final currentEmployeeId = userController.employeeId.value;
+
+        print('✅ USER EMPLOYEE ID: ${userController.employeeId.value}');
+        print(
+          '✅ ALL SUGGESTION EMPLOYEE IDs: ${suggestionController.suggestions.map((s) => s.employeeId).toList()}',
+        );
+
         // filter only current employee’s suggestions
         final mySuggestions = suggestionController.suggestions
-            .where((s) => s.employeeId == userController.employeeId.value)
+            .where((suggestion) => suggestion.employeeId == currentEmployeeId)
             .toList();
 
+        print('✅ MY SUGGESTIONS COUNT: ${mySuggestions.length}');
         if (mySuggestions.isEmpty) {
           return Center(child: Text("No suggestions submitted yet."));
         }
@@ -55,7 +63,7 @@ class MySuggestionsScreen extends StatelessWidget {
                     SizedBox(height: 5),
                     Text("Category: ${suggestion.category}"),
                     Text(
-                      "Status: ${suggestion.status ?? "Pending"}",
+                      "Status: ${suggestion.status}",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: suggestion.status == "Approved"

@@ -1,4 +1,4 @@
-// ignore_for_file: use_key_in_widget_constructors
+// ignore_for_file: use_key_in_widget_constructors, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,11 +6,32 @@ import 'package:get_storage/get_storage.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/routes/app_routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  Get.put(UserController(), permanent: true);
-  Get.put(SuggestionController());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 👇 1. Initialize GetStorage FIRST
   await GetStorage.init();
+
+  // 👇 2. Initialize SharedPreferences (if using)
+  await SharedPreferences.getInstance();
+
+  // 👇 3. Safe async controller initialization
+  try {
+    await Get.putAsync(() async {
+      final controller = UserController();
+      await controller.loadFromPrefs();
+      return controller;
+    });
+  } catch (e) {
+    print('⚠️ UserController failed to load: $e');
+    Get.put(UserController()); // Fallback
+  }
+
+  // 👇 4. Now put other controllers (sync is safe now)
+  Get.put(SuggestionController());
+
   runApp(MyApp());
 }
 

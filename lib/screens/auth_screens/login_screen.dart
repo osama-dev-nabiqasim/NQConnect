@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
-import 'package:nqconnect/data/dummy_db.dart';
+import 'package:nqconnect/services/api_service.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -39,47 +39,71 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      final id = _employeeIdController.text.trim();
-      final pass = _passwordController.text.trim();
+      final employeeId = _employeeIdController.text.trim();
+      final password = _passwordController.text.trim();
 
-      final user = DummyDB.users.firstWhere(
-        (u) => u["employeeId"] == id && u["password"] == pass,
-        orElse: () => {},
-      );
+      try {
+        setState(
+          () => isButtonEnabled = false,
+        ); // Disable button during API call
+        // Get.snackbar(
+        //   "Please wait",
+        //   "Logging in...",
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   duration: Duration(seconds: 2),
+        // );
 
-      if (user.isNotEmpty) {
-        // set user data in controller
+        // 👇 Call backend API
+        final apiService = ApiService();
+        final result = await apiService.login(employeeId, password);
+
+        // 👇 Extract user data
+        final user = result['user'];
+        final token = result['token'];
+
+        print('✅ FULL USER OBJECT: $user');
+        print('✅ KEYS IN USER: ${user.keys}');
+
+        // 👇 Save in controller
         userController.setUserData(
-          user["employeeId"]!,
-          user["name"]!,
-          user["role"]!,
-          user["department"]!,
+          user['Employee_ID'] ?? '', // 👈 Abhi yeh line galat ho sakti hai
+          user['name'] ?? '',
+          user['role'] ?? '',
+          user['department'] ?? '',
         );
 
+        print(
+          '✅ AFTER LOGIN - EMPLOYEE ID: ${userController.employeeId.value}',
+        );
         Get.snackbar(
           "Login Successful",
-          "Welcome, ${user["name"]} (${user["department"]})",
+          "Welcome, ${user['name']} (${user['department']})",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
+          duration: Duration(seconds: 3),
         );
 
+        // 👇 Clear fields
         _employeeIdController.clear();
         _passwordController.clear();
-        setState(() => isButtonEnabled = false);
 
-        // redirect based on role
+        // 👇 Navigate to dashboard
         Get.offNamed('/dashboard');
-      } else {
+      } catch (e) {
         Get.snackbar(
-          "Error",
-          "Invalid Employee ID or Password",
+          "Login Failed",
+          e.toString().replaceAll("Exception: ", ""),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
+          duration: Duration(seconds: 3),
+          icon: Icon(Icons.error_outline, color: Colors.white),
         );
+      } finally {
+        setState(() => isButtonEnabled = true);
       }
     }
   }

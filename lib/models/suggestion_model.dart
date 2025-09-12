@@ -1,97 +1,134 @@
 import 'package:nqconnect/models/status_history_model.dart';
 
 class Suggestion {
-  final String id;
-  final String title;
-  final String description;
-  final String? image;
-  final String category;
-  final String employeeId;
-  final String employeeName; // 👈 Added employee name
-  final String department;
-  final DateTime createdAt;
-  String status; // Pending / Approved / Rejected / Archived
-
-  // For voting functionality
+  int id; // 👈 Remove 'final'
+  String title;
+  String description;
+  String category;
+  String employeeId;
+  String employeeName;
+  String department;
+  String status;
   int likes;
   int dislikes;
-
-  // New fields for management
+  DateTime createdAt;
   DateTime? reviewedAt;
   String? reviewedBy;
   String? reviewComments;
   bool isArchived;
+  String? image;
   List<StatusHistory> statusHistory;
+  String? userVote;
 
   Suggestion({
     required this.id,
     required this.title,
     required this.description,
-    this.image,
     required this.category,
     required this.employeeId,
-    required this.employeeName, // 👈 Added
+    required this.employeeName,
     required this.department,
+    required this.status,
+    required this.likes,
+    required this.dislikes,
     required this.createdAt,
-    this.status = "Pending",
-    this.likes = 0,
-    this.dislikes = 0,
     this.reviewedAt,
     this.reviewedBy,
     this.reviewComments,
     this.isArchived = false,
-    List<StatusHistory>? statusHistory,
-  }) : statusHistory = statusHistory ?? [];
+    this.image,
+    this.userVote,
+    this.statusHistory = const [],
+  });
 
-  // Convert to Map
+  factory Suggestion.fromJson(Map<String, dynamic> json) {
+    return Suggestion(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      category: json['category'],
+      employeeId: json['employee_id'],
+      employeeName: json['employee_name'],
+      department: json['department'],
+      status: json['status'],
+      likes: json['likes'] ?? 0,
+      dislikes: json['dislikes'] ?? 0,
+      createdAt: DateTime.parse(json['created_at']),
+      reviewedAt: json['reviewed_at'] != null
+          ? DateTime.parse(json['reviewed_at'])
+          : null,
+      reviewedBy: json['reviewed_by'],
+      reviewComments: json['review_comments'],
+      isArchived: json['is_archived'] ?? false,
+      image: json['image'],
+      userVote: json['userVote'],
+      statusHistory: (json['statusHistory'] as List? ?? [])
+          .map((e) => StatusHistory.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
-      "id": id,
-      "title": title,
-      "description": description,
-      "image": image,
-      "category": category,
-      "employeeId": employeeId,
-      "employeeName": employeeName, // 👈 Added
-      "department": department,
-      "createdAt": createdAt.toIso8601String(),
-      "status": status,
-      "likes": likes,
-      "dislikes": dislikes,
-      "reviewedAt": reviewedAt?.toIso8601String(),
-      "reviewedBy": reviewedBy,
-      "reviewComments": reviewComments,
-      "isArchived": isArchived,
-      "statusHistory": statusHistory.map((h) => h.toMap()).toList(),
+      'id': id,
+      'title': title,
+      'description': description,
+      'category': category,
+      'userVote': userVote,
+      'employee_id': employeeId,
+      'employee_name': employeeName,
+      'department': department,
+      'status': status,
+      'likes': likes,
+      'dislikes': dislikes,
+      'created_at': createdAt.toIso8601String(),
+      'reviewed_at': reviewedAt?.toIso8601String(),
+      'reviewed_by': reviewedBy,
+      'review_comments': reviewComments,
+      'is_archived': isArchived,
+      'image': image,
+      'statusHistory': statusHistory.map((e) => e.toMap()).toList(),
     };
   }
 
-  // Create from Map
-  factory Suggestion.fromMap(Map<String, dynamic> map) {
+  // 👇 Optional: CopyWith method for immutable updates (if you want to keep fields final later)
+  Suggestion copyWith({
+    int? id,
+    String? title,
+    String? description,
+    String? category,
+    String? employeeId,
+    String? employeeName,
+    String? department,
+    String? status,
+    int? likes,
+    int? dislikes,
+    DateTime? createdAt,
+    DateTime? reviewedAt,
+    String? reviewedBy,
+    String? reviewComments,
+    bool? isArchived,
+    String? image,
+    List<StatusHistory>? statusHistory,
+  }) {
     return Suggestion(
-      id: map["id"],
-      title: map["title"],
-      description: map["description"],
-      image: map["image"],
-      category: map["category"],
-      employeeId: map["employeeId"],
-      employeeName: map["employeeName"] ?? "Unknown", // 👈 Added
-      department: map["department"],
-      createdAt: DateTime.parse(map["createdAt"]),
-      status: map["status"] ?? "Pending",
-      likes: map["likes"] ?? 0,
-      dislikes: map["dislikes"] ?? 0,
-      reviewedAt: map["reviewedAt"] != null
-          ? DateTime.parse(map["reviewedAt"])
-          : null,
-      reviewedBy: map["reviewedBy"],
-      reviewComments: map["reviewComments"],
-      isArchived: map["isArchived"] ?? false,
-      statusHistory: map["statusHistory"] != null
-          ? (map["statusHistory"] as List)
-                .map((h) => StatusHistory.fromMap(h))
-                .toList()
-          : [],
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      employeeId: employeeId ?? this.employeeId,
+      employeeName: employeeName ?? this.employeeName,
+      department: department ?? this.department,
+      status: status ?? this.status,
+      likes: likes ?? this.likes,
+      dislikes: dislikes ?? this.dislikes,
+      createdAt: createdAt ?? this.createdAt,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+      reviewedBy: reviewedBy ?? this.reviewedBy,
+      reviewComments: reviewComments ?? this.reviewComments,
+      isArchived: isArchived ?? this.isArchived,
+      image: image ?? this.image,
+      statusHistory: statusHistory ?? this.statusHistory,
     );
   }
 }

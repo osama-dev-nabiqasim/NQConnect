@@ -21,9 +21,9 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
 
   void _vote(Suggestion suggestion, String type) {
     setState(() {
-      userVotes[suggestion.id] = type;
+      userVotes[suggestion.id.toString()] = type;
     });
-    suggestionController.voteOnSuggestion(suggestion.id, type);
+    suggestionController.voteOnSuggestion(suggestion.id.toString(), type);
   }
 
   @override
@@ -35,6 +35,10 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
         backgroundColor: AppColors.appbarColor[0],
       ),
       body: Obx(() {

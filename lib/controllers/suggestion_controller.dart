@@ -1,68 +1,240 @@
+// ignore_for_file: unnecessary_cast, unnecessary_import, await_only_futures
+
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:nqconnect/models/suggestion_model.dart';
-import 'package:nqconnect/models/status_history_model.dart';
+import '../services/api_service.dart';
+import '../models/suggestion_model.dart';
+import '../models/status_history_model.dart';
 
 class SuggestionController extends GetxController {
-  var suggestions = <Suggestion>[].obs;
+  final ApiService _apiService = ApiService();
   final box = GetStorage();
+  var suggestions = <Suggestion>[].obs;
+  var isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadSuggestions();
+    _loadData();
   }
 
-  void approveSuggestion(int index) {
-    if (index >= 0 && index < suggestions.length) {
-      suggestions[index].status = "Approved";
-      suggestions[index].reviewedAt = DateTime.now();
-      // You may want to set reviewedBy here too if available
-      saveSuggestions();
-      suggestions.refresh();
+  Future<void> _loadData() async {
+    try {
+      final data = await _apiService.getSuggestions();
+      // 👇 FIX 1: Type cast to Map<String, dynamic>
+      suggestions.value = data
+          .map((e) => Suggestion.fromJson(e as Map<String, dynamic>))
+          .toList();
+      _saveToLocal();
+    } catch (e) {
+      loadSuggestions();
+      Get.snackbar('Offline Mode', 'Loaded data from local storage');
     }
   }
 
-  void rejectSuggestion(int index) {
-    if (index >= 0 && index < suggestions.length) {
-      suggestions[index].status = "Rejected";
-      suggestions[index].reviewedAt = DateTime.now();
-      // You may want to set reviewedBy here too if available
-      saveSuggestions();
-      suggestions.refresh();
+  void addSuggestion(Suggestion suggestion) async {
+    try {
+      final data = {
+        'title': suggestion.title,
+        'description': suggestion.description,
+        'category': suggestion.category,
+        'employee_id': suggestion.employeeId,
+        'employee_name': suggestion.employeeName,
+        'department': suggestion.department,
+      };
+
+      final result = await _apiService.addSuggestion(data);
+
+      // 👇 FIX 2: Type cast result to Map
+      final resultMap = result as Map<String, dynamic>;
+
+      // 👇 FIX 3: Safe ID assignment
+      final newId = resultMap['id'];
+      if (newId != null) {
+        suggestion.id = newId is int
+            ? newId
+            : int.tryParse(newId.toString()) ?? suggestion.id;
+      }
+      // 👇 FIX 4: Safe DateTime parsing
+      final createdAt = resultMap['created_at'];
+      if (createdAt is String) {
+        suggestion.createdAt = DateTime.parse(createdAt);
+      } else {
+        suggestion.createdAt = DateTime.now();
+      }
+
+      // 👇 FIX 5: Ensure unique ID
+      if (suggestion.id <= 0) {
+        suggestion.id = DateTime.now().millisecondsSinceEpoch;
+      }
+
+      suggestions.add(suggestion);
+      _saveToLocal();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to add suggestion');
     }
   }
 
-  void addSuggestion(Suggestion suggestion) {
-    suggestions.add(suggestion);
-    saveSuggestions();
-  }
-
-  void updateSuggestionStatus(
+  Future<void> updateSuggestionStatus(
     String suggestionId,
     String newStatus,
     String reviewedBy,
     String? comments,
-  ) {
-    final index = suggestions.indexWhere((s) => s.id == suggestionId);
-    if (index != -1) {
-      suggestions[index].status = newStatus;
-      suggestions[index].reviewedBy = reviewedBy;
-      suggestions[index].reviewedAt = DateTime.now();
-      suggestions[index].reviewComments = comments;
+  ) async {
+    try {
+      final data = {
+        'status': newStatus,
+        'reviewed_by': reviewedBy,
+        'comments': comments,
+      };
 
-      // Add to status history
-      suggestions[index].statusHistory.add(
-        StatusHistory(
-          status: newStatus,
-          changedBy: reviewedBy,
-          changedAt: DateTime.now(),
-          comments: comments,
-        ),
+      await _apiService.updateSuggestionStatus(suggestionId, data);
+
+      final index = suggestions.indexWhere((s) => s.id == suggestionId);
+      if (index != -1) {
+        suggestions[index].status = newStatus;
+        suggestions[index].reviewedBy = reviewedBy;
+        suggestions[index].reviewedAt = DateTime.now();
+        suggestions[index].reviewComments = comments;
+        suggestions.refresh();
+
+        suggestions[index].statusHistory.add(
+          StatusHistory(
+            status: newStatus,
+            changedBy: reviewedBy,
+            changedAt: DateTime.now(),
+            comments: comments,
+          ),
+        );
+      }
+      _saveToLocal();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update status');
+    }
+  }
+
+  void voteOnSuggestion(String suggestionId, String type) async {
+    try {
+      await _apiService.voteOnSuggestion(suggestionId, type);
+
+      final index = suggestions.indexWhere((s) => s.id == suggestionId);
+      if (index != -1) {
+        if (type == "like") {
+          suggestions[index].likes++;
+        } else if (type == "dislike") {
+          suggestions[index].dislikes++;
+        }
+        _saveToLocal();
+        suggestions.refresh();
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to vote');
+    }
+  }
+
+  Future<void> approveSuggestion(int index) async {
+    if (index >= 0 && index < suggestions.length) {
+      final suggestion = suggestions[index];
+      await updateSuggestionStatus(
+        suggestion.id.toString(), // 👈 Convert to String
+        "Approved",
+        "Manager", // 👈 Better than "System"
+        "Approved via Approve/Reject Screen",
       );
+      // 👇 Optional: Refresh data to reflect changes
+      // await fetchSuggestions();
+    }
+  }
 
-      saveSuggestions();
+  Future<void> rejectSuggestion(int index) async {
+    if (index >= 0 && index < suggestions.length) {
+      final suggestion = suggestions[index];
+      await updateSuggestionStatus(
+        suggestion.id.toString(), // 👈 Convert to String
+        "Rejected",
+        "Manager",
+        "Rejected via Approve/Reject Screen",
+      );
+      // 👇 Optional: Refresh data to reflect changes
+      // await fetchSuggestions();
+    }
+  }
+
+  Future<void> fetchSuggestions() async {
+    try {
+      isLoading.value = true;
+      final data = await _apiService.getSuggestions();
+      suggestions.value = data
+          .map((e) => Suggestion.fromJson(e as Map<String, dynamic>))
+          .toList();
+      _saveToLocal();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load suggestions');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // 👇 Add this method for bulk status update
+  void bulkUpdateStatus(
+    List<String> suggestionIds,
+    String newStatus,
+    String reviewedBy,
+    String? comments,
+  ) async {
+    try {
+      for (var id in suggestionIds) {
+        final index = suggestions.indexWhere((s) => s.id.toString() == id);
+        if (index != -1) {
+          // 👇 Update locally
+          suggestions[index].status = newStatus;
+          suggestions[index].reviewedBy = reviewedBy;
+          suggestions[index].reviewedAt = DateTime.now();
+          suggestions[index].reviewComments = comments;
+
+          // 👇 Add to status history
+          suggestions[index].statusHistory.add(
+            StatusHistory(
+              status: newStatus,
+              changedBy: reviewedBy,
+              changedAt: DateTime.now(),
+              comments: comments ?? 'Bulk action',
+            ),
+          );
+
+          // 👇 Call backend API
+          await _apiService.updateSuggestionStatus(id, {
+            'status': newStatus,
+            'reviewed_by': reviewedBy,
+            'comments': comments,
+          });
+        }
+      }
+      _saveToLocal();
       suggestions.refresh();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update status in bulk');
+    }
+  }
+
+  // 👇 Add this method for bulk archive
+  void bulkArchive(List<String> suggestionIds, bool archive) async {
+    try {
+      for (var id in suggestionIds) {
+        final index = suggestions.indexWhere((s) => s.id.toString() == id);
+        if (index != -1) {
+          // 👇 Update locally
+          suggestions[index].isArchived = archive;
+
+          // 👇 If you have backend API for archive — call it here
+          // await _apiService.archiveSuggestion(id, archive);
+        }
+      }
+      _saveToLocal();
+      suggestions.refresh();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to archive in bulk');
     }
   }
 
@@ -70,52 +242,11 @@ class SuggestionController extends GetxController {
     final index = suggestions.indexWhere((s) => s.id == suggestionId);
     if (index != -1) {
       suggestions[index].isArchived = archive;
-      saveSuggestions();
+      _saveToLocal();
       suggestions.refresh();
     }
   }
 
-  // Bulk actions
-  void bulkUpdateStatus(
-    List<String> suggestionIds,
-    String newStatus,
-    String reviewedBy,
-    String? comments,
-  ) {
-    for (var id in suggestionIds) {
-      final index = suggestions.indexWhere((s) => s.id == id);
-      if (index != -1) {
-        suggestions[index].status = newStatus;
-        suggestions[index].reviewedBy = reviewedBy;
-        suggestions[index].reviewedAt = DateTime.now();
-        suggestions[index].reviewComments = comments;
-
-        suggestions[index].statusHistory.add(
-          StatusHistory(
-            status: newStatus,
-            changedBy: reviewedBy,
-            changedAt: DateTime.now(),
-            comments: comments ?? 'Bulk action',
-          ),
-        );
-      }
-    }
-    saveSuggestions();
-    suggestions.refresh();
-  }
-
-  void bulkArchive(List<String> suggestionIds, bool archive) {
-    for (var id in suggestionIds) {
-      final index = suggestions.indexWhere((s) => s.id == id);
-      if (index != -1) {
-        suggestions[index].isArchived = archive;
-      }
-    }
-    saveSuggestions();
-    suggestions.refresh();
-  }
-
-  // Filter methods
   List<Suggestion> getActiveSuggestions() {
     return suggestions.where((s) => !s.isArchived).toList();
   }
@@ -150,27 +281,11 @@ class SuggestionController extends GetxController {
         .toList();
   }
 
-  // ✅ Voting functionality (existing)
-  void voteOnSuggestion(String suggestionId, String type) {
-    final index = suggestions.indexWhere((s) => s.id == suggestionId);
-    if (index != -1) {
-      if (type == "like") {
-        suggestions[index].likes++;
-      } else if (type == "dislike") {
-        suggestions[index].dislikes++;
-      }
-      saveSuggestions();
-      suggestions.refresh();
-    }
-  }
-
-  // ✅ Department suggestions (existing)
   List<Suggestion> getDepartmentSuggestions(String department) {
     return suggestions.where((s) => s.department == department).toList();
   }
 
-  // ✅ Local storage (existing with enhanced data)
-  void saveSuggestions() {
+  void _saveToLocal() {
     final data = suggestions.map((s) => s.toMap()).toList();
     box.write('suggestions', data);
   }
@@ -179,12 +294,11 @@ class SuggestionController extends GetxController {
     final data = box.read<List>('suggestions');
     if (data != null) {
       suggestions.value = data
-          .map((e) => Suggestion.fromMap(Map<String, dynamic>.from(e)))
+          .map((e) => Suggestion.fromJson(e as Map<String, dynamic>))
           .toList();
     }
   }
 
-  // Statistics methods (existing)
   int getTotalPending() =>
       suggestions.where((s) => s.status == "Pending").length;
   int getTotalApproved() =>

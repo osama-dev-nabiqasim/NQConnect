@@ -284,7 +284,8 @@ class SuggestionManagementScreen extends StatelessWidget {
           leading: controller.isSelecting.value
               ? Checkbox(
                   value: controller.selectedSuggestions.contains(suggestion.id),
-                  onChanged: (_) => controller.toggleSelection(suggestion.id),
+                  onChanged: (_) =>
+                      controller.toggleSelection(suggestion.id.toString()),
                 )
               : _buildStatusIcon(suggestion.status),
           title: Text(
@@ -352,7 +353,7 @@ class SuggestionManagementScreen extends StatelessWidget {
               : null,
           onTap: () {
             if (controller.isSelecting.value) {
-              controller.toggleSelection(suggestion.id);
+              controller.toggleSelection(suggestion.id.toString());
             } else {
               _showSuggestionDetails(suggestion);
             }
@@ -381,7 +382,7 @@ class SuggestionManagementScreen extends StatelessWidget {
         break;
       case 'approve':
         controller.suggestionController.updateSuggestionStatus(
-          suggestion.id,
+          suggestion.id.toString(),
           'Approved',
           controller.userController.userName.value,
           'Approved via management console',
@@ -389,7 +390,7 @@ class SuggestionManagementScreen extends StatelessWidget {
         break;
       case 'reject':
         controller.suggestionController.updateSuggestionStatus(
-          suggestion.id,
+          suggestion.id.toString(),
           'Rejected',
           controller.userController.userName.value,
           'Rejected via management console',
@@ -397,7 +398,7 @@ class SuggestionManagementScreen extends StatelessWidget {
         break;
       case 'archive':
         controller.suggestionController.archiveSuggestion(
-          suggestion.id,
+          suggestion.id.toString(),
           !suggestion.isArchived,
         );
         break;

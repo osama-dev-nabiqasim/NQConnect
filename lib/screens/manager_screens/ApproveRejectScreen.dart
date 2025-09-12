@@ -19,9 +19,9 @@ class ApproveRejectScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Obx(() {
-        final deptSuggestions = controller.getDepartmentSuggestions(
-          managerDepartment,
-        );
+        final deptSuggestions = controller.suggestions
+            .where((s) => s.department == managerDepartment)
+            .toList();
 
         if (deptSuggestions.isEmpty) {
           return Center(child: Text("No suggestions for your department!"));
@@ -55,19 +55,43 @@ class ApproveRejectScreen extends StatelessWidget {
                         children: [
                           IconButton(
                             icon: Icon(Icons.check, color: Colors.green),
-                            onPressed: () => controller.approveSuggestion(
-                              controller.suggestions.indexOf(s),
-                            ),
+                            onPressed: () async {
+                              await controller.approveSuggestion(
+                                controller.suggestions.indexOf(s),
+                              );
+                              Get.snackbar(
+                                "Approved",
+                                "${s.title} approved successfully",
+                                backgroundColor: Colors.green,
+                                colorText: Colors.white,
+                              );
+                            },
                           ),
                           IconButton(
                             icon: Icon(Icons.close, color: Colors.red),
-                            onPressed: () => controller.rejectSuggestion(
-                              controller.suggestions.indexOf(s),
-                            ),
+                            onPressed: () async {
+                              await controller.rejectSuggestion(
+                                controller.suggestions.indexOf(s),
+                              );
+                              Get.snackbar(
+                                "Rejected",
+                                "${s.title} rejected successfully",
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            },
                           ),
                         ],
                       )
-                    : null,
+                    : Text(
+                        s.status,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: s.status == "Approved"
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                      ),
               ),
             );
           },

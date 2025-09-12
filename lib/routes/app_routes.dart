@@ -37,10 +37,10 @@ class AppRoutes {
       name: '/tasks',
       page: () => PlaceholderScreen(title: "My Tasks"),
     ),
-    GetPage(
-      name: '/suggestions',
-      page: () => PlaceholderScreen(title: "Suggestion Box"),
-    ),
+    // GetPage(
+    //   name: '/suggestions',
+    //   page: () => PlaceholderScreen(title: "Suggestion Box"),
+    // ),
     GetPage(name: '/votes', page: () => VoteOnSuggestionScreen()),
     GetPage(name: '/my_suggestions', page: () => MySuggestionsScreen()),
 
