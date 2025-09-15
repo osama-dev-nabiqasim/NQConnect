@@ -2,10 +2,20 @@
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   final String baseUrl = 'http://10.0.2.2:5000/api';
   // 👇 Add this method inside ApiService class
+  static const storage = FlutterSecureStorage();
+
+  Future<String?> _getToken() async {
+    final token = await storage.read(key: 'jwt_token');
+    if (token == null) {
+      print('No JWT token found in storage'); // Debug log
+    }
+    return token;
+  }
 
   Future<Map<String, dynamic>> login(String employeeId, String password) async {
     try {
@@ -14,10 +24,14 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'employee_id': employeeId, 'password': password}),
       );
+      print(
+        'Login response: ${response.statusCode} ${response.body}',
+      ); // Debug log
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
+          await storage.write(key: 'jwt_token', value: data['token']);
           return data;
         } else {
           throw Exception('Invalid Employee ID or Password. Please try again.');
@@ -29,6 +43,7 @@ class ApiService {
         throw Exception('Something went wrong. Please try again later.');
       }
     } catch (e) {
+      print('Login error: $e');
       throw Exception(
         'Unable to connect to server. Please check your internet connection.',
       );
@@ -38,7 +53,19 @@ class ApiService {
   // Suggestions fetch karein
   Future<List<dynamic>> getSuggestions() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/suggestions'));
+      final token = await _getToken();
+      // final response = await http.get(Uri.parse('$baseUrl/suggestions'));
+      final response = await http.get(
+        Uri.parse('$baseUrl/suggestions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print(
+        'Get suggestions response: ${response.statusCode} ${response.body}',
+      ); // Debug log
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -51,6 +78,7 @@ class ApiService {
         throw Exception('Failed to load suggestions: ${response.statusCode}');
       }
     } catch (e) {
+      print('Get suggestions error: $e'); // Debug log
       throw Exception('Network Error: $e');
     }
   }
@@ -58,68 +86,165 @@ class ApiService {
   // POST new suggestion
   Future<Map<String, dynamic>> addSuggestion(Map<String, dynamic> data) async {
     try {
+      final token = await _getToken();
       final response = await http.post(
         Uri.parse('$baseUrl/suggestions'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
         body: jsonEncode(data),
       );
+
+      print(
+        'Add suggestion response: ${response.statusCode} ${response.body}',
+      ); // Debug log
+
       if (response.statusCode == 201 || response.statusCode == 200) {
         final result = jsonDecode(response.body);
         return result;
       } else {
-        throw Exception('Failed to add suggestion');
+        throw Exception('Failed to add suggestion: ${response.statusCode}');
       }
     } catch (e) {
+      print('Add suggestion error: $e'); // Debug log
       throw Exception('Network error: $e');
     }
   }
 
   // PUT update suggestion status
-  Future<void> updateSuggestionStatus(
+  // Future<void> updateSuggestionStatus(
+  //   String id,
+  //   Map<String, dynamic> data,
+  // ) async {
+  //   try {
+  //     final response = await http.put(
+  //       Uri.parse('$baseUrl/suggestions/$id/status'),
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(data),
+  //     );
+  //     if (response.statusCode != 200) {
+  //       throw Exception('Failed to update status');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Network error: $e');
+  //   }
+  // }
+
+  // // POST like/dislike
+  // Future<void> voteOnSuggestion(
+  //   String suggestionId,
+  //   String type,
+  //   String employeeId,
+  // ) async {
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse('$baseUrl/suggestions/$suggestionId/vote'),
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({'type': type, 'employee_id': employeeId}),
+  //     );
+  //     if (response.statusCode != 200) {
+  //       throw Exception('Failed to vote');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Network error: $e');
+  //   }
+  // }
+
+  // Future<String?> getUserVote(String suggestionId, String employeeId) async {
+  //   try {
+  //     final response = await http.get(
+  //       Uri.parse(
+  //         '$baseUrl/suggestions/$suggestionId/vote?employee_id=$employeeId',
+  //       ),
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+  //       return data['data'];
+  //     } else {
+  //       return null;
+  //     }
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
+
+  Future<Map<String, dynamic>> updateSuggestionStatus(
     String id,
     Map<String, dynamic> data,
   ) async {
     try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No JWT token available');
       final response = await http.put(
-        Uri.parse('$baseUrl/suggestions/$id/status'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse(
+          '$baseUrl/suggestions/$id/status',
+        ), // Aligned with previous backend
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
         body: jsonEncode(data),
       );
-      if (response.statusCode != 200) {
-        throw Exception('Failed to update status');
+
+      print(
+        'Update suggestion status response: ${response.statusCode} ${response.body}',
+      ); // Debug log
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to update status: ${response.statusCode}');
       }
     } catch (e) {
+      print('Update suggestion status error: $e'); // Debug log
+
       throw Exception('Network error: $e');
     }
   }
 
-  // POST like/dislike
   Future<void> voteOnSuggestion(
     String suggestionId,
     String type,
     String employeeId,
   ) async {
     try {
+      final token = await _getToken();
       final response = await http.post(
         Uri.parse('$baseUrl/suggestions/$suggestionId/vote'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
         body: jsonEncode({'type': type, 'employee_id': employeeId}),
       );
+      print(
+        'Vote response: ${response.statusCode} ${response.body}',
+      ); // Debug log
       if (response.statusCode != 200) {
-        throw Exception('Failed to vote');
+        throw Exception('Failed to vote: ${response.statusCode}');
       }
     } catch (e) {
+      print('Vote error: $e'); // Debug log
       throw Exception('Network error: $e');
     }
   }
 
   Future<String?> getUserVote(String suggestionId, String employeeId) async {
     try {
+      final token = await _getToken();
       final response = await http.get(
         Uri.parse(
           '$baseUrl/suggestions/$suggestionId/vote?employee_id=$employeeId',
         ),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
+      print(
+        'Get user vote response: ${response.statusCode} ${response.body}',
+      ); // Debug log
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['data'];
@@ -127,6 +252,7 @@ class ApiService {
         return null;
       }
     } catch (e) {
+      print('Get user vote error: $e'); // Debug log
       return null;
     }
   }

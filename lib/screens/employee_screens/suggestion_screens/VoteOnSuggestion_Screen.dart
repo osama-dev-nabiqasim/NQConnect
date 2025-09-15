@@ -61,13 +61,6 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
         employeeId,
       );
 
-      // 👇 Optional: Update suggestion's userVote field (if using model field)
-      // final index = suggestionController.suggestions.indexWhere((s) => s.id.toString() == suggestionId);
-      // if (index != -1) {
-      //   suggestionController.suggestions[index].userVote = type;
-      //   suggestionController.suggestions.refresh();
-      // }
-
       Get.snackbar(
         type == "like" ? "Liked!" : "Disliked!",
         "Your vote has been recorded",
@@ -93,25 +86,33 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
         backgroundColor: AppColors.appbarColor[0],
       ),
       body: Obx(() {
+        // 👇 Filter 1: Only approved suggestions
         final approvedSuggestions = suggestionController.suggestions
             .where((s) => s.status == "Approved")
             .toList();
 
-        if (approvedSuggestions.isEmpty) {
-          return const Center(child: Text("No approved suggestions yet."));
+        // 👇 Filter 2: Only suggestions where user has NOT voted
+        final unvotedSuggestions = approvedSuggestions
+            .where(
+              (suggestion) => !userVotes.containsKey(suggestion.id.toString()),
+            )
+            .toList();
+
+        if (unvotedSuggestions.isEmpty) {
+          return const Center(child: Text("No new suggestions to vote!"));
         }
 
         return ListView.builder(
-          itemCount: approvedSuggestions.length,
+          itemCount: unvotedSuggestions.length,
           padding: const EdgeInsets.all(12),
           itemBuilder: (context, index) {
-            final suggestion = approvedSuggestions[index];
+            final suggestion = unvotedSuggestions[index];
             final currentVote = userVotes[suggestion.id.toString()];
 
             return Card(
@@ -143,6 +144,10 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                         const SizedBox(height: 8),
                         Text(
                           "Department: ${suggestion.department}",
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                        Text(
+                          "Submitted by: ${suggestion.employeeId}",
                           style: const TextStyle(color: Colors.black54),
                         ),
                         Text(
@@ -190,14 +195,8 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                                 icon: const Icon(Icons.thumb_up),
                                 label: const Text("Like"),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      userVotes[suggestion.id] == "like"
-                                      ? Colors.green
-                                      : Colors.grey.shade200,
-                                  foregroundColor:
-                                      userVotes[suggestion.id] == "like"
-                                      ? Colors.white
-                                      : Colors.black,
+                                  backgroundColor: Colors.grey.shade200,
+                                  foregroundColor: Colors.black,
                                 ),
                               ),
                               ElevatedButton.icon(
@@ -205,14 +204,8 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                                 icon: const Icon(Icons.thumb_down),
                                 label: const Text("Dislike"),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      userVotes[suggestion.id] == "dislike"
-                                      ? Colors.red
-                                      : Colors.grey.shade200,
-                                  foregroundColor:
-                                      userVotes[suggestion.id] == "dislike"
-                                      ? Colors.white
-                                      : Colors.black,
+                                  backgroundColor: Colors.grey.shade200,
+                                  foregroundColor: Colors.black,
                                 ),
                               ),
                             ],

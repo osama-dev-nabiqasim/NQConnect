@@ -22,6 +22,7 @@ class ApproveRejectScreen extends StatelessWidget {
         final deptSuggestions = controller.suggestions
             .where((s) => s.department == managerDepartment)
             .toList();
+        // final deptSuggestions = controller.getDepartmentSuggestions(managerDepartment);
 
         if (deptSuggestions.isEmpty) {
           return Center(child: Text("No suggestions for your department!"));
@@ -35,6 +36,7 @@ class ApproveRejectScreen extends StatelessWidget {
 
             return Card(
               margin: EdgeInsets.symmetric(vertical: 8),
+              elevation: 4,
               child: ListTile(
                 leading: Icon(
                   Icons.lightbulb_outline,
@@ -44,9 +46,25 @@ class ApproveRejectScreen extends StatelessWidget {
                       ? Colors.green
                       : Colors.red,
                 ),
-                title: Text(s.title),
-                subtitle: Text(
-                  "${s.description}\nStatus: ${s.status}\nBy: ${s.employeeId}",
+                title: Text(
+                  s.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                // subtitle: Text(
+                //   "${s.description}\nStatus: ${s.status}\nBy: ${s.employeeId}",
+                // ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      s.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4),
+                    Text("Status: ${s.status}"),
+                    Text("By: ${s.employeeId}"),
+                  ],
                 ),
                 isThreeLine: true,
                 trailing: s.status == "Pending"
@@ -56,8 +74,8 @@ class ApproveRejectScreen extends StatelessWidget {
                           IconButton(
                             icon: Icon(Icons.check, color: Colors.green),
                             onPressed: () async {
-                              await controller.approveSuggestion(
-                                controller.suggestions.indexOf(s),
+                              await controller.approveSuggestionById(
+                                s.id.toString(),
                               );
                               Get.snackbar(
                                 "Approved",
@@ -70,8 +88,8 @@ class ApproveRejectScreen extends StatelessWidget {
                           IconButton(
                             icon: Icon(Icons.close, color: Colors.red),
                             onPressed: () async {
-                              await controller.rejectSuggestion(
-                                controller.suggestions.indexOf(s),
+                              await controller.rejectSuggestionById(
+                                s.id.toString(),
                               );
                               Get.snackbar(
                                 "Rejected",
@@ -83,13 +101,25 @@ class ApproveRejectScreen extends StatelessWidget {
                           ),
                         ],
                       )
-                    : Text(
-                        s.status,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                    : Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
                           color: s.status == "Approved"
-                              ? Colors.green
-                              : Colors.red,
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          s.status,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: s.status == "Approved"
+                                ? Colors.green
+                                : Colors.red,
+                          ),
                         ),
                       ),
               ),

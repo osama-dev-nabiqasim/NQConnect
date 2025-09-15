@@ -91,7 +91,7 @@ class _EmployeeSuggestionFormScreenState
         backgroundColor: AppColors.appbarColor[0],
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
         title: Text(

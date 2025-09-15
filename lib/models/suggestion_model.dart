@@ -43,7 +43,10 @@ class Suggestion {
 
   factory Suggestion.fromJson(Map<String, dynamic> json) {
     return Suggestion(
-      id: json['id'],
+      // id: json['id'],
+      id: json['id'] is int
+          ? json['id']
+          : int.parse(json['id'].toString()), // Handle string IDs
       title: json['title'],
       description: json['description'],
       category: json['category'],
@@ -110,6 +113,7 @@ class Suggestion {
     bool? isArchived,
     String? image,
     List<StatusHistory>? statusHistory,
+    String? userVote,
   }) {
     return Suggestion(
       id: id ?? this.id,
@@ -129,6 +133,7 @@ class Suggestion {
       isArchived: isArchived ?? this.isArchived,
       image: image ?? this.image,
       statusHistory: statusHistory ?? this.statusHistory,
+      userVote: userVote ?? this.userVote,
     );
   }
 }

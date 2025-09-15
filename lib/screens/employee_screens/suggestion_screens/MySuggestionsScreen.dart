@@ -1,4 +1,4 @@
-// ignore_for_file: dead_code
+// ignore_for_file: dead_code, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,7 +20,7 @@ class MySuggestionsScreen extends StatelessWidget {
         backgroundColor: AppColors.appbarColor[0],
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -51,6 +51,8 @@ class MySuggestionsScreen extends StatelessWidget {
           itemCount: mySuggestions.length,
           itemBuilder: (context, index) {
             final suggestion = mySuggestions[index];
+            final totalVotes = suggestion.likes + suggestion.dislikes;
+
             return Card(
               margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               elevation: 2,
@@ -74,6 +76,20 @@ class MySuggestionsScreen extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+                trailing: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[100],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$totalVotes votes',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[800],
+                    ),
+                  ),
                 ),
               ),
             );

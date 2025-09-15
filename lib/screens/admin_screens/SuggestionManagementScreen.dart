@@ -1,5 +1,4 @@
 // ignore_for_file: sort_child_properties_last
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_management_controller.dart';
@@ -24,7 +23,6 @@ class SuggestionManagementScreen extends StatelessWidget {
         backgroundColor: AppColors.appbarColor[0],
         centerTitle: true,
         actions: [
-          // Action button with proper Obx usage
           Obx(() {
             if (controller.isSelecting.value) {
               return IconButton(
@@ -56,7 +54,6 @@ class SuggestionManagementScreen extends StatelessWidget {
           Expanded(child: _buildSuggestionsList()),
         ],
       ),
-      // Floating action button with proper Obx
       floatingActionButton: Obx(() {
         if (controller.isSelecting.value) {
           return FloatingActionButton(
@@ -76,7 +73,6 @@ class SuggestionManagementScreen extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            // View Toggle
             Row(
               children: [
                 _buildFilterChip('Active', 'active'),
@@ -85,8 +81,6 @@ class SuggestionManagementScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            // Search Bar
             TextField(
               decoration: InputDecoration(
                 hintText: 'Search suggestions...',
@@ -98,8 +92,6 @@ class SuggestionManagementScreen extends StatelessWidget {
               onChanged: (value) => controller.searchQuery.value = value,
             ),
             const SizedBox(height: 12),
-
-            // Filter Row
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -261,7 +253,9 @@ class SuggestionManagementScreen extends StatelessWidget {
   Widget _buildSuggestionsList() {
     return Obx(() {
       final suggestions = controller.filteredSuggestions;
-
+      if (controller.suggestionController.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
       if (suggestions.isEmpty) {
         return const Center(child: Text('No suggestions found'));
       }
@@ -277,13 +271,20 @@ class SuggestionManagementScreen extends StatelessWidget {
   }
 
   Widget _buildSuggestionCard(Suggestion suggestion) {
-    return Obx(
-      () => Card(
+    return Obx(() {
+      final isUpdating =
+          controller.suggestionController.isLoading.value &&
+          controller.suggestionController.suggestions.any(
+            (s) => s.id.toString() == suggestion.id.toString(),
+          );
+      return Card(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: ListTile(
           leading: controller.isSelecting.value
               ? Checkbox(
-                  value: controller.selectedSuggestions.contains(suggestion.id),
+                  value: controller.selectedSuggestions.contains(
+                    suggestion.id.toString(),
+                  ),
                   onChanged: (_) =>
                       controller.toggleSelection(suggestion.id.toString()),
                 )
@@ -316,7 +317,9 @@ class SuggestionManagementScreen extends StatelessWidget {
               ),
             ],
           ),
-          trailing: !controller.isSelecting.value
+          trailing: isUpdating
+              ? const CircularProgressIndicator(strokeWidth: 2)
+              : !controller.isSelecting.value
               ? PopupMenuButton(
                   itemBuilder: (context) => [
                     const PopupMenuItem(
@@ -360,8 +363,8 @@ class SuggestionManagementScreen extends StatelessWidget {
           },
           onLongPress: () => controller.isSelecting.value = true,
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildStatusIcon(String status) {
@@ -381,20 +384,40 @@ class SuggestionManagementScreen extends StatelessWidget {
         _showSuggestionDetails(suggestion);
         break;
       case 'approve':
-        controller.suggestionController.updateSuggestionStatus(
-          suggestion.id.toString(),
-          'Approved',
-          controller.userController.userName.value,
-          'Approved via management console',
-        );
+        controller.suggestionController
+            .updateSuggestionStatus(
+              suggestion.id.toString(),
+              'Approved',
+              controller.userController.userName.value,
+              'Approved via management console',
+            )
+            .then((_) {
+              Get.snackbar(
+                'Approved',
+                '${suggestion.title} approved successfully',
+                backgroundColor: Colors.green,
+                colorText: Colors.white,
+                snackPosition: SnackPosition.BOTTOM,
+              );
+            });
         break;
       case 'reject':
-        controller.suggestionController.updateSuggestionStatus(
-          suggestion.id.toString(),
-          'Rejected',
-          controller.userController.userName.value,
-          'Rejected via management console',
-        );
+        controller.suggestionController
+            .updateSuggestionStatus(
+              suggestion.id.toString(),
+              'Rejected',
+              controller.userController.userName.value,
+              'Rejected via management console',
+            )
+            .then((_) {
+              Get.snackbar(
+                'Rejected',
+                '${suggestion.title} rejected successfully',
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+                snackPosition: SnackPosition.BOTTOM,
+              );
+            });
         break;
       case 'archive':
         controller.suggestionController.archiveSuggestion(
