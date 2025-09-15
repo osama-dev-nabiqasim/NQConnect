@@ -19,11 +19,38 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
   // Track user vote locally
   final Map<String, String> userVotes = {}; // {suggestionId: "like"/"dislike"}
 
-  void _vote(Suggestion suggestion, String type) {
+  void _vote(Suggestion suggestion, String type) async {
+    final suggestionId = suggestion.id.toString();
+
+    // 👇 First, update local state
     setState(() {
-      userVotes[suggestion.id.toString()] = type;
+      userVotes[suggestionId] = type;
     });
-    suggestionController.voteOnSuggestion(suggestion.id.toString(), type);
+
+    try {
+      // 👇 Call backend to update vote
+      await suggestionController.voteOnSuggestion(suggestionId, type);
+
+      // 👇 Optional: Update suggestion's userVote field (if using model field)
+      // final index = suggestionController.suggestions.indexWhere((s) => s.id.toString() == suggestionId);
+      // if (index != -1) {
+      //   suggestionController.suggestions[index].userVote = type;
+      //   suggestionController.suggestions.refresh();
+      // }
+
+      Get.snackbar(
+        type == "like" ? "Liked!" : "Disliked!",
+        "Your vote has been recorded",
+        backgroundColor: type == "like" ? Colors.green : Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar("Error", "Failed to record vote");
+      // Revert local state on error
+      setState(() {
+        userVotes.remove(suggestionId);
+      });
+    }
   }
 
   @override
@@ -55,6 +82,7 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
           padding: const EdgeInsets.all(12),
           itemBuilder: (context, index) {
             final suggestion = approvedSuggestions[index];
+            final currentVote = userVotes[suggestion.id.toString()];
 
             return Card(
               elevation: 3,
@@ -103,41 +131,60 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                           ),
                         ],
                         const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: () => _vote(suggestion, "like"),
-                              icon: const Icon(Icons.thumb_up),
-                              label: const Text("Like"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    userVotes[suggestion.id] == "like"
-                                    ? Colors.green
-                                    : Colors.grey.shade200,
-                                foregroundColor:
-                                    userVotes[suggestion.id] == "like"
-                                    ? Colors.white
-                                    : Colors.black,
-                              ),
+                        if (currentVote != null)
+                          ElevatedButton.icon(
+                            onPressed: null, // 👈 Disable after vote
+                            icon: Icon(
+                              currentVote == "like"
+                                  ? Icons.thumb_up
+                                  : Icons.thumb_down,
                             ),
-                            ElevatedButton.icon(
-                              onPressed: () => _vote(suggestion, "dislike"),
-                              icon: const Icon(Icons.thumb_down),
-                              label: const Text("Dislike"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    userVotes[suggestion.id] == "dislike"
-                                    ? Colors.red
-                                    : Colors.grey.shade200,
-                                foregroundColor:
-                                    userVotes[suggestion.id] == "dislike"
-                                    ? Colors.white
-                                    : Colors.black,
-                              ),
+                            label: Text(
+                              currentVote == "like" ? "Liked" : "Disliked",
                             ),
-                          ],
-                        ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: currentVote == "like"
+                                  ? Colors.green
+                                  : Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                          )
+                        else
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () => _vote(suggestion, "like"),
+                                icon: const Icon(Icons.thumb_up),
+                                label: const Text("Like"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      userVotes[suggestion.id] == "like"
+                                      ? Colors.green
+                                      : Colors.grey.shade200,
+                                  foregroundColor:
+                                      userVotes[suggestion.id] == "like"
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () => _vote(suggestion, "dislike"),
+                                icon: const Icon(Icons.thumb_down),
+                                label: const Text("Dislike"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      userVotes[suggestion.id] == "dislike"
+                                      ? Colors.red
+                                      : Colors.grey.shade200,
+                                  foregroundColor:
+                                      userVotes[suggestion.id] == "dislike"
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),

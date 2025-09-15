@@ -114,7 +114,7 @@ class SuggestionController extends GetxController {
     }
   }
 
-  void voteOnSuggestion(String suggestionId, String type) async {
+  Future<void> voteOnSuggestion(String suggestionId, String type) async {
     try {
       await _apiService.voteOnSuggestion(suggestionId, type);
 
