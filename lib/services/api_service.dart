@@ -94,18 +94,40 @@ class ApiService {
   }
 
   // POST like/dislike
-  Future<void> voteOnSuggestion(String id, String type) async {
+  Future<void> voteOnSuggestion(
+    String suggestionId,
+    String type,
+    String employeeId,
+  ) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/suggestions/$id/vote'),
+        Uri.parse('$baseUrl/suggestions/$suggestionId/vote'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'type': type}),
+        body: jsonEncode({'type': type, 'employee_id': employeeId}),
       );
       if (response.statusCode != 200) {
         throw Exception('Failed to vote');
       }
     } catch (e) {
       throw Exception('Network error: $e');
+    }
+  }
+
+  Future<String?> getUserVote(String suggestionId, String employeeId) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          '$baseUrl/suggestions/$suggestionId/vote?employee_id=$employeeId',
+        ),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data'];
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
     }
   }
 }

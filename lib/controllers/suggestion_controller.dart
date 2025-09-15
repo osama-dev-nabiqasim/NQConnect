@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_cast, unnecessary_import, await_only_futures
+// ignore_for_file: unnecessary_cast, unnecessary_import, await_only_futures, unrelated_type_equality_checks
 
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
@@ -114,9 +114,13 @@ class SuggestionController extends GetxController {
     }
   }
 
-  Future<void> voteOnSuggestion(String suggestionId, String type) async {
+  Future<void> voteOnSuggestion(
+    String suggestionId,
+    String type,
+    String employeeId,
+  ) async {
     try {
-      await _apiService.voteOnSuggestion(suggestionId, type);
+      await _apiService.voteOnSuggestion(suggestionId, type, employeeId);
 
       final index = suggestions.indexWhere((s) => s.id == suggestionId);
       if (index != -1) {
@@ -130,6 +134,14 @@ class SuggestionController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to vote');
+    }
+  }
+
+  Future<String?> getUserVote(String suggestionId, String employeeId) async {
+    try {
+      return await _apiService.getUserVote(suggestionId, employeeId);
+    } catch (e) {
+      return null;
     }
   }
 

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
+import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
@@ -15,12 +16,37 @@ class VoteOnSuggestionScreen extends StatefulWidget {
 class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
   final SuggestionController suggestionController =
       Get.find<SuggestionController>();
-
+  final UserController userController = Get.find<UserController>();
   // Track user vote locally
-  final Map<String, String> userVotes = {}; // {suggestionId: "like"/"dislike"}
+  Map<String, String> userVotes = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserVotes(); // 👈 Load votes from backend on init
+  }
+
+  Future<void> _loadUserVotes() async {
+    final approvedSuggestions = suggestionController.suggestions
+        .where((s) => s.status == "Approved")
+        .toList();
+
+    for (var suggestion in approvedSuggestions) {
+      final vote = await suggestionController.getUserVote(
+        suggestion.id.toString(),
+        userController.employeeId.value, // 👈 Current user's ID
+      );
+      if (vote != null) {
+        setState(() {
+          userVotes[suggestion.id.toString()] = vote;
+        });
+      }
+    }
+  }
 
   void _vote(Suggestion suggestion, String type) async {
     final suggestionId = suggestion.id.toString();
+    final employeeId = userController.employeeId.value;
 
     // 👇 First, update local state
     setState(() {
@@ -29,7 +55,11 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
 
     try {
       // 👇 Call backend to update vote
-      await suggestionController.voteOnSuggestion(suggestionId, type);
+      await suggestionController.voteOnSuggestion(
+        suggestionId,
+        type,
+        employeeId,
+      );
 
       // 👇 Optional: Update suggestion's userVote field (if using model field)
       // final index = suggestionController.suggestions.indexWhere((s) => s.id.toString() == suggestionId);
@@ -131,6 +161,8 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                           ),
                         ],
                         const SizedBox(height: 12),
+
+                        // 👇 Show only the voted button — or both if not voted
                         if (currentVote != null)
                           ElevatedButton.icon(
                             onPressed: null, // 👈 Disable after vote
