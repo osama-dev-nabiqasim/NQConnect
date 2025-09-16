@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_cast, unnecessary_import, await_only_futures, unrelated_type_equality_checks
+// ignore_for_file: unnecessary_cast, unnecessary_import, await_only_futures, unrelated_type_equality_checks, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,7 +25,7 @@ class SuggestionController extends GetxController {
     try {
       isLoading.value = true;
       final data = await _apiService.getSuggestions();
-      print('Fetched suggestions: ${data.length} items'); // Debug log
+      print('Fetched suggestions: ${data.length} items');
       suggestions.value = data
           .map((e) => Suggestion.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -33,12 +33,12 @@ class SuggestionController extends GetxController {
     } catch (e) {
       loadSuggestions();
       print(e);
-      Get.snackbar(
-        'Error',
-        'Failed to load suggestions: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   'Error',
+      //   'Failed to load suggestions: $e',
+      //   backgroundColor: Colors.red,
+      //   colorText: Colors.white,
+      // );
     } finally {
       isLoading.value = false;
     }
@@ -245,7 +245,7 @@ class SuggestionController extends GetxController {
       print('Error updating status: $e'); // Debug log
       Get.snackbar(
         'Error',
-        'Failed to update status: $e',
+        'Failed to update status',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -321,7 +321,7 @@ class SuggestionController extends GetxController {
       print(e);
       Get.snackbar(
         'Error',
-        'Failed to vote: $e',
+        'Failed to vote',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -546,9 +546,10 @@ class SuggestionController extends GetxController {
       suggestions.refresh();
       _saveToLocal();
     } catch (e) {
+      print(e);
       Get.snackbar(
         'Error',
-        'Failed to update status in bulk: $e',
+        'Failed to update status in bulk',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -569,9 +570,10 @@ class SuggestionController extends GetxController {
       suggestions.refresh();
       _saveToLocal();
     } catch (e) {
+      print(e);
       Get.snackbar(
         'Error',
-        'Failed to archive in bulk: $e',
+        'Failed to archive in bulk',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

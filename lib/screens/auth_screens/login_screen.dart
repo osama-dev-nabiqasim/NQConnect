@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, sized_box_for_whitespace
+// ignore_for_file: deprecated_member_use, sized_box_for_whitespace, avoid_print
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -93,9 +93,19 @@ class _LoginScreenState extends State<LoginScreen> {
         // 👇 Navigate to dashboard
         Get.offNamed('/dashboard');
       } catch (e) {
+        String errorMessage = e.toString().replaceAll("Exception: ", "");
+        if (errorMessage.contains("Server is offline") ||
+            errorMessage.contains("unreachable") ||
+            errorMessage.contains("not responding")) {
+          errorMessage =
+              "Server is currently offline. Please try again later or contact admin.";
+        } else if (errorMessage.contains("Invalid Employee ID or Password")) {
+          errorMessage = "Invalid Employee ID or Password. Please try again.";
+        }
+        print(e);
         Get.snackbar(
           "Login Failed",
-          e.toString().replaceAll("Exception: ", ""),
+          errorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -335,16 +345,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 : AppColors.buttonDisabledLinearGradient,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Center(
-            child: Text(
-              "LOGIN",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          child: isButtonEnabled
+              ? Center(
+                  child: Text(
+                    "LOGIN",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              : Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 6,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
         ),
       ),
     );

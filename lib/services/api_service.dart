@@ -1,8 +1,11 @@
 // lib/services/api_service.dart
 
+// ignore_for_file: avoid_print
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:io';
 
 class ApiService {
   final String baseUrl = 'http://10.0.2.2:5000/api';
@@ -19,11 +22,13 @@ class ApiService {
 
   Future<Map<String, dynamic>> login(String employeeId, String password) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'employee_id': employeeId, 'password': password}),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'employee_id': employeeId, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 10));
       print(
         'Login response: ${response.statusCode} ${response.body}',
       ); // Debug log
@@ -39,9 +44,24 @@ class ApiService {
       } else if (response.statusCode == 401) {
         // 👇 Also handle 401 explicitly
         throw Exception('Invalid Employee ID or Password. Please try again.');
+      } else if (response.statusCode >= 500) {
+        throw Exception(
+          'Server is currently offline or experiencing issues. Please try again later.',
+        );
       } else {
         throw Exception('Something went wrong. Please try again later.');
       }
+    } on SocketException {
+      // 👈 Handle connection refused (server off)
+      print('Login error: SocketException - Server unreachable');
+      throw Exception(
+        'Server is offline or unreachable. Please check if the server is running and try again.',
+      );
+    } on http.ClientException catch (e) {
+      print('Network error in login: $e');
+      throw Exception(
+        'Server is offline or unreachable. Please check if the backend is running and try again.',
+      );
     } catch (e) {
       print('Login error: $e');
       throw Exception(

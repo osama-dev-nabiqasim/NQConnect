@@ -16,6 +16,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   int _currentLogoIndex = 0;
+  bool _isDisposed = false;
 
   final List<String> _logoPaths = [
     'assets/images/NQLogo.png',
@@ -28,7 +29,6 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       duration: const Duration(milliseconds: 4000), // Slower animation
       vsync: this,
@@ -39,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Navigate after all animations
     Future.delayed(Duration(milliseconds: 3200), () {
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         Get.offNamed('/login');
       }
     });
@@ -50,14 +50,16 @@ class _SplashScreenState extends State<SplashScreen>
       await Future.delayed(
         const Duration(milliseconds: 300),
       ); // Slower transition
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         setState(() {
           _currentLogoIndex = i;
         });
       }
-      // Restart animation for each logo
-      _controller.reset();
-      _controller.forward();
+      if (!_isDisposed) {
+        // 👈 Check before reset/forward
+        _controller.reset();
+        _controller.forward();
+      }
 
       // Wait for this logo to complete before showing next
       await Future.delayed(Duration(milliseconds: 300));
@@ -66,6 +68,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _controller.dispose();
     super.dispose();
   }
