@@ -1,4 +1,4 @@
-// ignore_for_file: sort_child_properties_last
+// ignore_for_file: sort_child_properties_last, await_only_futures
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_management_controller.dart';
@@ -165,7 +165,7 @@ class SuggestionManagementScreen extends StatelessWidget {
         items: controller.availableStatuses.map((status) {
           return DropdownMenuItem(
             value: status,
-            child: Text(status == 'all' ? 'All Statuses' : status),
+            child: Text(status == 'all' ? 'All Status' : status),
           );
         }).toList(),
         onChanged: (value) => controller.selectedStatus.value = value!,
@@ -204,17 +204,57 @@ class SuggestionManagementScreen extends StatelessWidget {
           ),
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.check, color: Colors.green),
-                onPressed: () => _showBulkActionDialog('Approve'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, color: Colors.red),
-                onPressed: () => _showBulkActionDialog('Reject'),
-              ),
+              // IconButton(
+              //   icon: const Icon(Icons.check, color: Colors.green),
+              //   onPressed: () => _showBulkActionDialog('Approved'),
+              // ),
+              // IconButton(
+              //   icon: const Icon(Icons.close, color: Colors.red),
+              //   onPressed: () => _showBulkActionDialog('Rejected'),
+              // ),
+              // IconButton(
+              //   icon: const Icon(Icons.archive, color: Colors.orange),
+              //   onPressed: () => controller.bulkArchive(true),
+              // ),
               IconButton(
                 icon: const Icon(Icons.archive, color: Colors.orange),
-                onPressed: () => controller.bulkArchive(true),
+                onPressed: () {
+                  final isArchivedTab =
+                      controller.currentView.value == 'archived';
+                  controller.bulkArchive(!isArchivedTab);
+                  //  → if user is on Archived tab, pass false (unarchive)
+                  //    else pass true (archive)
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.redAccent),
+                onPressed: () {
+                  Get.defaultDialog(
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 24,
+                      horizontal: 28,
+                    ),
+                    backgroundColor: Colors.blue.shade100,
+                    title: 'Delete',
+                    middleText: 'Delete selected suggestions?',
+                    textCancel: 'Cancel',
+                    textConfirm: 'Delete',
+                    confirmTextColor: Colors.white,
+                    onConfirm: () async {
+                      final ids = controller.selectedSuggestions.toList();
+                      await controller.suggestionController
+                          .bulkDeleteSuggestions(ids);
+                      controller.clearSelection();
+                      Get.back();
+                      Get.snackbar(
+                        'Deleted',
+                        '${ids.length} suggestions deleted',
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),
@@ -223,36 +263,39 @@ class SuggestionManagementScreen extends StatelessWidget {
     );
   }
 
-  void _showBulkActionDialog(String action) {
-    final commentsController = TextEditingController();
-    Get.dialog(
-      AlertDialog(
-        title: Text('$action Selected Suggestions'),
-        content: TextField(
-          controller: commentsController,
-          decoration: const InputDecoration(
-            hintText: 'Add comments (optional)',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              controller.bulkUpdateStatus(action, commentsController.text);
-              Get.back();
-            },
-            child: Text(action),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _showBulkActionDialog(String action) {
+  //   final commentsController = TextEditingController();
+  //   Get.dialog(
+  //     AlertDialog(
+  //       title: Text('$action Selected Suggestions'),
+  //       content: TextField(
+  //         controller: commentsController,
+  //         decoration: const InputDecoration(
+  //           hintText: 'Add comments (optional)',
+  //           border: OutlineInputBorder(),
+  //         ),
+  //         maxLines: 3,
+  //       ),
+  //       actions: [
+  //         TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+  //         TextButton(
+  //           onPressed: () {
+  //             controller.bulkUpdateStatus(action, commentsController.text);
+  //             Get.back();
+  //             Get.snackbar('$action complete', 'Selected suggestions updated');
+  //           },
+  //           child: Text(action),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildSuggestionsList() {
     return Obx(() {
-      final suggestions = controller.filteredSuggestions;
+      final suggestions = controller.filteredSuggestions
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
       if (controller.suggestionController.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }

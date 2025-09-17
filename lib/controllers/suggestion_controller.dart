@@ -21,6 +21,30 @@ class SuggestionController extends GetxController {
     fetchSuggestions();
   }
 
+  Future<void> deleteSuggestion(String id) async {
+    try {
+      await _apiService.deleteSuggestion(id);
+      // remove locally
+      suggestions.removeWhere((s) => s.id.toString() == id);
+      // optionally refresh from server:
+      await fetchSuggestions();
+    } catch (e) {
+      print('SuggestionController.deleteSuggestion error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> bulkDeleteSuggestions(List<String> ids) async {
+    try {
+      await _apiService.bulkDeleteSuggestions(ids);
+      suggestions.removeWhere((s) => ids.contains(s.id.toString()));
+      await fetchSuggestions();
+    } catch (e) {
+      print('SuggestionController.bulkDeleteSuggestions error: $e');
+      rethrow;
+    }
+  }
+
   Future<void> fetchSuggestions() async {
     try {
       isLoading.value = true;

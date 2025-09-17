@@ -130,6 +130,20 @@ class ApiService {
     }
   }
 
+  Future<void> verifyOtp(String email, String otp) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/verify-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'reset_code': otp}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+        jsonDecode(response.body.toString())['message'] ??
+            'Failed to verify OTP',
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> resetPassword(
     String email,
     String resetCode,
@@ -373,6 +387,58 @@ class ApiService {
     } catch (e) {
       print('Get user vote error: $e'); // Debug log
       return null;
+    }
+  }
+
+  Future<void> deleteSuggestion(String id) async {
+    try {
+      final token = await _getToken();
+      final response = await http
+          .delete(
+            Uri.parse('$baseUrl/suggestions/$id'),
+            headers: {
+              'Content-Type': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 15));
+
+      print(
+        'Delete suggestion response: ${response.statusCode} ${response.body}',
+      );
+      if (response.statusCode != 200) {
+        final body = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+        throw Exception(body['message'] ?? 'Failed to delete suggestion');
+      }
+    } catch (e) {
+      print('Delete suggestion error: $e');
+      throw Exception('Network error: $e');
+    }
+  }
+
+  // BULK delete suggestions
+  Future<void> bulkDeleteSuggestions(List<String> ids) async {
+    try {
+      final token = await _getToken();
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/suggestions/bulk-delete'),
+            headers: {
+              'Content-Type': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({'ids': ids}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      print('Bulk delete response: ${response.statusCode} ${response.body}');
+      if (response.statusCode != 200) {
+        final body = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+        throw Exception(body['message'] ?? 'Failed to bulk delete');
+      }
+    } catch (e) {
+      print('Bulk delete error: $e');
+      throw Exception('Network error: $e');
     }
   }
 }

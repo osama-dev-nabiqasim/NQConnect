@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, deprecated_member_use, unused_local_variable
+// ignore_for_file: prefer_const_constructors, deprecated_member_use, unused_local_variable, unused_element
 
 import 'dart:async';
 import 'dart:ui';
@@ -16,7 +16,7 @@ class EnterOtpScreen extends StatefulWidget {
 
 class _EnterOtpScreenState extends State<EnterOtpScreen> {
   final TextEditingController _emailotpController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  // final TextEditingController _passwordController = TextEditingController();
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
   // final TextEditingController _phoneotpController = TextEditingController();
@@ -53,22 +53,19 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
     });
   }
 
-  Future<void> _resetPassword() async {
+  Future<void> _verifyOtp() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
         final email = Get.arguments['email'];
-        await _apiService.resetPassword(
-          email,
-          _emailotpController.text.trim(),
-          _passwordController.text.trim(),
-        );
+        await _apiService.verifyOtp(email, _emailotpController.text.trim());
         Get.snackbar(
           "Success",
-          "Password reset successfully",
+          "OTP verified successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
+        // 👉 OTP verify hone ke baad aap jo next screen dikhana chahte hain wahan navigate karein
         Get.offNamed("/login");
       } catch (e) {
         Get.snackbar(
@@ -82,7 +79,6 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       }
     }
   }
-
   // void _verifyOtp() {
   //   if (_formKey.currentState!.validate()) {
   //     String emailOtp = _emailotpController.text.trim();
@@ -233,12 +229,11 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
 
                           // Email OTP Input
                           _emailField(),
-                          SizedBox(height: 16),
+                          SizedBox(height: 12),
 
                           // OTP Input
-                          _phonenumberField(),
-                          SizedBox(height: 20),
-
+                          // _phonenumberField(),
+                          // SizedBox(height: 20),
                           _isResendAvailable
                               ? TextButton(
                                   onPressed: _resendOtp,
@@ -258,13 +253,14 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                                   ),
                                 ),
 
-                          SizedBox(height: 25),
+                          SizedBox(height: 20),
 
                           // Verify Button
                           _isLoading
                               ? CircularProgressIndicator()
                               : GestureDetector(
-                                  onTap: _resetPassword,
+                                  onTap: _verifyOtp,
+
                                   child: Container(
                                     width: double.infinity,
                                     padding: EdgeInsets.symmetric(vertical: 14),

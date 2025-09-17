@@ -118,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen>
             top: position.dy,
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 250), // Very fast opacity
-              opacity: _currentLogoIndex == index ? 1.0 : 0.1,
+              opacity: _currentLogoIndex == index ? 1.0 : 0.2,
               child: Transform.scale(
                 scale: _currentLogoIndex == index
                     ? 1.15

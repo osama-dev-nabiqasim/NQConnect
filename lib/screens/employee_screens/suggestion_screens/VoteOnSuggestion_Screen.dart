@@ -93,16 +93,21 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
       ),
       body: Obx(() {
         // 👇 Filter 1: Only approved suggestions
-        final approvedSuggestions = suggestionController.suggestions
-            .where((s) => s.status == "Approved")
-            .toList();
+        final approvedSuggestions =
+            suggestionController.suggestions
+                .where((s) => s.status == "Approved")
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         // 👇 Filter 2: Only suggestions where user has NOT voted
-        final unvotedSuggestions = approvedSuggestions
-            .where(
-              (suggestion) => !userVotes.containsKey(suggestion.id.toString()),
-            )
-            .toList();
+        final unvotedSuggestions =
+            approvedSuggestions
+                .where(
+                  (suggestion) =>
+                      !userVotes.containsKey(suggestion.id.toString()),
+                )
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         if (unvotedSuggestions.isEmpty) {
           return const Center(child: Text("No new suggestions to vote!"));
@@ -146,10 +151,10 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                           "Department: ${suggestion.department}",
                           style: const TextStyle(color: Colors.black54),
                         ),
-                        Text(
-                          "Submitted by: ${suggestion.employeeId}",
-                          style: const TextStyle(color: Colors.black54),
-                        ),
+                        // Text(
+                        //   "Submitted by: ${suggestion.employeeId}",
+                        //   style: const TextStyle(color: Colors.black54),
+                        // ),
                         Text(
                           "Created: ${suggestion.createdAt.toLocal().toString().split(' ')[0]}",
                           style: const TextStyle(color: Colors.black54),

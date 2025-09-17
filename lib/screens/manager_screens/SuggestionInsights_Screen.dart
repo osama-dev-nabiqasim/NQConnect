@@ -28,10 +28,12 @@ class SuggestionInsightsScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Obx(() {
-        final deptSuggestions = suggestionController
-            .getDepartmentSuggestions(managerDept)
-            .where((s) => s.status == "Approved") // sirf approved
-            .toList();
+        final deptSuggestions =
+            suggestionController
+                .getDepartmentSuggestions(managerDept)
+                .where((s) => s.status == "Approved") // sirf approved
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         if (deptSuggestions.isEmpty) {
           return const Center(

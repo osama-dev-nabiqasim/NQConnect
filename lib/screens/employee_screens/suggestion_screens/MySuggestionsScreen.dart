@@ -38,9 +38,13 @@ class MySuggestionsScreen extends StatelessWidget {
         );
 
         // filter only current employee’s suggestions
-        final mySuggestions = suggestionController.suggestions
-            .where((suggestion) => suggestion.employeeId == currentEmployeeId)
-            .toList();
+        final mySuggestions =
+            suggestionController.suggestions
+                .where(
+                  (suggestion) => suggestion.employeeId == currentEmployeeId,
+                )
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         print('✅ MY SUGGESTIONS COUNT: ${mySuggestions.length}');
         if (mySuggestions.isEmpty) {

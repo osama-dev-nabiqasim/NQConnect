@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
@@ -19,9 +21,12 @@ class ApproveRejectScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Obx(() {
-        final deptSuggestions = controller.suggestions
-            .where((s) => s.department == managerDepartment)
-            .toList();
+        final deptSuggestions =
+            controller.suggestions
+                .where((s) => s.department == managerDepartment)
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
         // final deptSuggestions = controller.getDepartmentSuggestions(managerDepartment);
 
         if (deptSuggestions.isEmpty) {
@@ -62,7 +67,8 @@ class ApproveRejectScreen extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4),
-                    Text("Status: ${s.status}"),
+                    // Text("Status: ${s.status}"),
+                    Text('Created: ${s.createdAt.toString().split(' ')[0]}'),
                     Text("By: ${s.employeeId}"),
                   ],
                 ),
