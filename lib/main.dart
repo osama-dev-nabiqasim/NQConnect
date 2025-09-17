@@ -1,6 +1,7 @@
 // ignore_for_file: use_key_in_widget_constructors, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
@@ -9,11 +10,12 @@ import 'package:nqconnect/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
+  await dotenv.load(fileName: "assets/.env"); // Load .env file
+
   WidgetsFlutterBinding.ensureInitialized();
 
   // 👇 1. Initialize GetStorage FIRST
   await GetStorage.init();
-
   // 👇 2. Initialize SharedPreferences (if using)
   await SharedPreferences.getInstance();
 

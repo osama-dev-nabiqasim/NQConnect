@@ -345,23 +345,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 : AppColors.buttonDisabledLinearGradient,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: isButtonEnabled
-              ? Center(
-                  child: Text(
-                    "LOGIN",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              : Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 6,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
+          child: Center(
+            child: Text(
+              "LOGIN",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
       ),
     );

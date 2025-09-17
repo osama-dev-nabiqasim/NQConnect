@@ -8,7 +8,30 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
 
 class ApiService {
+  // For Emulator
   final String baseUrl = 'http://10.0.2.2:5000/api';
+
+  // For physical device
+  // final String baseUrl = 'http://10.10.5.126:5000/api';
+
+  // final String baseUrl = 'http://${await storage.read(key: 'server_ip') ?? '10.10.5.126'}:5000/api';
+
+  // Future<void> _initBaseUrl() async {
+  //   // Try to get user-saved IP from secure storage
+  //   final savedIP = await storage.read(key: 'server_ip');
+  //   if (savedIP != null) {
+  //     baseUrl = 'http://$savedIP:5000/api';
+  //   } else {
+  //     // Fallback to .env file
+  //     baseUrl = dotenv.env['BASE_URL'] ?? 'http://10.10.5.126:5000/api';
+  //   }
+  // }
+
+  // final String baseUrl =
+  //     dotenv.env['BASE_URL'] ?? 'http://10.10.5.126:5000/api';
+
+  // final String baseUrl = 'http://10.10.5.126:5000/api';
+
   // 👇 Add this method inside ApiService class
   static const storage = FlutterSecureStorage();
 
