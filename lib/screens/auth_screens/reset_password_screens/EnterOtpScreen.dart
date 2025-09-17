@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nqconnect/services/api_service.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
 class EnterOtpScreen extends StatefulWidget {
@@ -15,7 +16,10 @@ class EnterOtpScreen extends StatefulWidget {
 
 class _EnterOtpScreenState extends State<EnterOtpScreen> {
   final TextEditingController _emailotpController = TextEditingController();
-  final TextEditingController _phoneotpController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final ApiService _apiService = ApiService();
+  bool _isLoading = false;
+  // final TextEditingController _phoneotpController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Timer? _timer;
@@ -49,33 +53,62 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
     });
   }
 
-  void _verifyOtp() {
+  Future<void> _resetPassword() async {
     if (_formKey.currentState!.validate()) {
-      String emailOtp = _emailotpController.text.trim();
-      String phoneOtp = _phoneotpController.text.trim();
-
-      // TODO: Add your OTP verification logic (API/controller call)
-      if (emailOtp == "123456" && phoneOtp == "123456") {
+      setState(() => _isLoading = true);
+      try {
+        final email = Get.arguments['email'];
+        await _apiService.resetPassword(
+          email,
+          _emailotpController.text.trim(),
+          _passwordController.text.trim(),
+        );
         Get.snackbar(
           "Success",
-          "OTP Verified Successfully",
+          "Password reset successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-        Get.offNamed("/resetpasswordscreen");
-      } else {
+        Get.offNamed("/login");
+      } catch (e) {
         Get.snackbar(
           "Error",
-          "Invalid OTP, please try again",
+          e.toString(),
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
+      } finally {
+        setState(() => _isLoading = false);
       }
     }
   }
 
+  // void _verifyOtp() {
+  //   if (_formKey.currentState!.validate()) {
+  //     String emailOtp = _emailotpController.text.trim();
+  //     // String phoneOtp = _phoneotpController.text.trim();
+
+  //     // TODO: Add your OTP verification logic (API/controller call)
+  //     if (emailOtp == "123456") {
+  //       Get.snackbar(
+  //         "Success",
+  //         "OTP Verified Successfully",
+  //         backgroundColor: Colors.green,
+  //         colorText: Colors.white,
+  //       );
+  //       Get.offNamed("/resetpasswordscreen");
+  //     } else {
+  //       Get.snackbar(
+  //         "Error",
+  //         "Invalid OTP, please try again",
+  //         backgroundColor: Colors.red,
+  //         colorText: Colors.white,
+  //       );
+  //     }
+  //   }
+  // }
+
   void _resendOtp() {
-    // TODO: Call API to resend OTP
     Get.snackbar(
       "OTP Sent",
       "A new code has been sent to your email and phone number.",
@@ -91,7 +124,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       ),
 
       messageText: Text(
-        "A new code has been sent to your email and phone number.",
+        "A new code has been sent to your email",
         style: TextStyle(
           color: Colors.black, // ✅ title color black
           fontWeight: FontWeight.bold,
@@ -106,7 +139,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
   @override
   void dispose() {
     _emailotpController.dispose();
-    _phoneotpController.dispose();
+    // _phoneotpController.dispose();
     _timer?.cancel();
     super.dispose();
   }
@@ -119,7 +152,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -189,7 +222,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            "We have sent a 6-digit code to your email and phone number.",
+                            "We have sent a 6-digit code to your email.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
@@ -199,77 +232,11 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                           SizedBox(height: 30),
 
                           // Email OTP Input
-                          TextFormField(
-                            controller: _emailotpController,
-                            keyboardType: TextInputType.number,
-                            maxLength: 6,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Please enter OTP code";
-                              } else if (value.length < 6) {
-                                return "OTP must be 6 digits";
-                              }
-                              return null;
-                            },
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              counterText: "",
-                              prefixIcon: Icon(Icons.pin, color: Colors.white),
-                              hintText: "Enter Email Code",
-                              hintStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.1),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.3),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                            ),
-                          ),
+                          _emailField(),
                           SizedBox(height: 16),
 
                           // OTP Input
-                          TextFormField(
-                            controller: _phoneotpController,
-                            keyboardType: TextInputType.number,
-                            maxLength: 6,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Please enter OTP code";
-                              } else if (value.length < 6) {
-                                return "OTP must be 6 digits";
-                              }
-                              return null;
-                            },
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              counterText: "",
-                              prefixIcon: Icon(Icons.pin, color: Colors.white),
-                              hintText: "Enter Phone Number Code",
-                              hintStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.1),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.3),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                            ),
-                          ),
+                          _phonenumberField(),
                           SizedBox(height: 20),
 
                           _isResendAvailable
@@ -294,36 +261,38 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                           SizedBox(height: 25),
 
                           // Verify Button
-                          GestureDetector(
-                            onTap: _verifyOtp,
-                            child: Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.symmetric(vertical: 14),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: AppColors.buttonPrimary,
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    offset: Offset(4, 4),
-                                    blurRadius: 6,
+                          _isLoading
+                              ? CircularProgressIndicator()
+                              : GestureDetector(
+                                  onTap: _resetPassword,
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.symmetric(vertical: 14),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: AppColors.buttonPrimary,
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          offset: Offset(4, 4),
+                                          blurRadius: 6,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        "Verify",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "Verify",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -333,6 +302,72 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
               SizedBox(height: 40),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  TextFormField _phonenumberField() {
+    return TextFormField(
+      // controller: _phoneotpController,
+      keyboardType: TextInputType.number,
+      maxLength: 6,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please enter OTP code";
+        } else if (value.length < 6) {
+          return "OTP must be 6 digits";
+        }
+        return null;
+      },
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        counterText: "",
+        prefixIcon: Icon(Icons.pin, color: Colors.white),
+        hintText: "Enter Phone Number Code",
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  TextFormField _emailField() {
+    return TextFormField(
+      controller: _emailotpController,
+      keyboardType: TextInputType.number,
+      maxLength: 6,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please enter OTP code";
+        } else if (value.length < 6) {
+          return "OTP must be 6 digits";
+        }
+        return null;
+      },
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        counterText: "",
+        prefixIcon: Icon(Icons.pin, color: Colors.white),
+        hintText: "Enter Email Code",
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.white),
         ),
       ),
     );

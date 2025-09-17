@@ -1,8 +1,9 @@
-// ignore_for_file: prefer_const_constructors, deprecated_member_use
+// ignore_for_file: prefer_const_constructors, deprecated_member_use, unused_element
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nqconnect/services/api_service.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -14,21 +15,38 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+  // final TextEditingController _phoneController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final ApiService _apiService = ApiService();
+  bool _isLoading = false;
 
-  void _sendResetCode() {
+  Future<void> _sendResetCode() async {
     if (_formKey.currentState!.validate()) {
-      String email = _emailController.text.trim();
-      String phonenumber = _phoneController.text.trim();
-
-      Get.snackbar(
-        "Success",
-        "OTP sent to $email and $phonenumber",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-      Get.toNamed("/enterotpscreen");
+      setState(() => _isLoading = true);
+      try {
+        final response = await _apiService.forgotPassword(
+          _emailController.text.trim(),
+        );
+        Get.snackbar(
+          "Success",
+          response['message'] ?? "Reset code sent to your email",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        Get.toNamed(
+          "/enterotpscreen",
+          arguments: {'email': _emailController.text.trim()},
+        );
+      } catch (e) {
+        Get.snackbar(
+          "Error",
+          e.toString(),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -113,7 +131,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            "Enter your registered email and phone number to receive OTP.",
+                            "Enter your registered email to receive OTP.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
@@ -123,151 +141,49 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           SizedBox(height: 30),
 
                           // Email Input
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Please enter your email";
-                              } else if (!RegExp(
-                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$',
-                              ).hasMatch(value)) {
-                                return "Enter a valid email address";
-                              }
-                              return null;
-                            },
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(
-                                Icons.email_outlined,
-                                color: Colors.white,
-                              ),
-                              hintText: "Email",
-                              labelText: "Email",
-                              labelStyle: TextStyle(color: Colors.white),
-                              hintStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.1),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.3),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.3),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                            ),
-                          ),
+                          _emailTextField(),
 
-                          SizedBox(height: 25),
+                          // SizedBox(height: 25),
 
                           // Phone # Input
-                          TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(10),
-                              // Custom formatter to add dash after 3 digits
-                              _PakistanPhoneFormatter(),
-                            ],
-                            validator: (value) {
-                              final digitsOnly =
-                                  value?.replaceAll('-', '') ?? '';
-                              if (digitsOnly.isEmpty) {
-                                return "Please enter your phone number";
-                              } else if (!RegExp(
-                                r'^3[0-9]{9}$',
-                              ).hasMatch(digitsOnly)) {
-                                return "Enter a valid 10-digit phone number starting with 3";
-                              }
-                              return null;
-                            },
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              prefixIcon: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 15.0,
-                                  horizontal: 16,
-                                ),
-                                child: Text(
-                                  "+92",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              hintText: "3XX-XXXXXXX",
-                              labelText: "Phone Number",
-                              labelStyle: TextStyle(color: Colors.white),
-                              hintStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.1),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.3),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(
-                                  color: Colors.white.withOpacity(0.3),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                            ),
-                          ),
+                          // _phoneTextField(),
                           SizedBox(height: 25),
 
                           // Send Code Button
-                          GestureDetector(
-                            onTap: _sendResetCode,
-                            child: Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.symmetric(vertical: 14),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: AppColors.buttonPrimary,
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    offset: Offset(4, 4),
-                                    blurRadius: 6,
+                          _isLoading
+                              ? CircularProgressIndicator(
+                                  color: AppColors.primaryColor.first,
+                                )
+                              : GestureDetector(
+                                  onTap: _sendResetCode,
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.symmetric(vertical: 14),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: AppColors.buttonPrimary,
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          offset: Offset(4, 4),
+                                          blurRadius: 6,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        "Send Code",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "Send Code",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -277,6 +193,99 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               SizedBox(height: 40),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // TextFormField _phoneTextField() {
+  //   return TextFormField(
+  //     controller: _phoneController,
+  //     keyboardType: TextInputType.number,
+  //     inputFormatters: [
+  //       FilteringTextInputFormatter.digitsOnly,
+  //       LengthLimitingTextInputFormatter(10),
+  //       // Custom formatter to add dash after 3 digits
+  //       _PakistanPhoneFormatter(),
+  //     ],
+  //     validator: (value) {
+  //       final digitsOnly = value?.replaceAll('-', '') ?? '';
+  //       if (digitsOnly.isEmpty) {
+  //         return "Please enter your phone number";
+  //       } else if (!RegExp(r'^3[0-9]{9}$').hasMatch(digitsOnly)) {
+  //         return "Enter a valid 10-digit phone number starting with 3";
+  //       }
+  //       return null;
+  //     },
+  //     style: TextStyle(color: Colors.white),
+  //     decoration: InputDecoration(
+  //       prefixIcon: Padding(
+  //         padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 16),
+  //         child: Text(
+  //           "+92",
+  //           style: TextStyle(
+  //             color: Colors.white,
+  //             fontWeight: FontWeight.bold,
+  //             fontSize: 16,
+  //           ),
+  //         ),
+  //       ),
+  //       hintText: "3XX-XXXXXXX",
+  //       labelText: "Phone Number",
+  //       labelStyle: TextStyle(color: Colors.white),
+  //       hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+  //       filled: true,
+  //       fillColor: Colors.white.withOpacity(0.1),
+  //       border: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(18),
+  //         borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+  //       ),
+  //       enabledBorder: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(18),
+  //         borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+  //       ),
+  //       focusedBorder: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(18),
+  //         borderSide: BorderSide(color: Colors.white),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  TextFormField _emailTextField() {
+    return TextFormField(
+      controller: _emailController,
+      keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please enter your email";
+        } else if (!RegExp(
+          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$',
+        ).hasMatch(value)) {
+          return "Enter a valid email address";
+        }
+        return null;
+      },
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        prefixIcon: Icon(Icons.email_outlined, color: Colors.white),
+        hintText: "Email",
+        labelText: "Email",
+        labelStyle: TextStyle(color: Colors.white),
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.white),
         ),
       ),
     );

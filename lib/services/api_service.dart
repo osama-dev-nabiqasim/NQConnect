@@ -1,6 +1,6 @@
 // lib/services/api_service.dart
 
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, await_only_futures
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,10 +8,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
 
 class ApiService {
-  // For Emulator
+  // -------------------- For Emulator---------------------------------------
   final String baseUrl = 'http://10.0.2.2:5000/api';
 
-  // For physical device
+  // ------------------ For physical device  -------------------------------------
   // final String baseUrl = 'http://10.10.5.126:5000/api';
 
   // final String baseUrl = 'http://${await storage.read(key: 'server_ip') ?? '10.10.5.126'}:5000/api';
@@ -90,6 +90,82 @@ class ApiService {
       throw Exception(
         'Unable to connect to server. Please check your internet connection.',
       );
+    }
+  }
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      await baseUrl;
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/forgot-password'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email}),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      print(
+        'Forgot password response: ${response.statusCode} ${response.body}',
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data;
+        } else {
+          throw Exception(
+            data['message'] ?? 'Failed to process forgot password request',
+          );
+        }
+      } else if (response.statusCode == 404) {
+        throw Exception('Email not found');
+      } else {
+        throw Exception(
+          'Failed to process forgot password request: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      print('Forgot password error: $e');
+      throw Exception('Network error: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword(
+    String email,
+    String resetCode,
+    String newPassword,
+  ) async {
+    try {
+      await baseUrl;
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/reset-password'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': email,
+              'reset_code': resetCode,
+              'new_password': newPassword,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      print('Reset password response: ${response.statusCode} ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data;
+        } else {
+          throw Exception(data['message'] ?? 'Failed to reset password');
+        }
+      } else if (response.statusCode == 400) {
+        throw Exception('Invalid or expired reset code');
+      } else {
+        throw Exception('Failed to reset password: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Reset password error: $e');
+      throw Exception('Network error: $e');
     }
   }
 

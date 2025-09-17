@@ -92,10 +92,8 @@ class _SplashScreenState extends State<SplashScreen>
               // Main animated logo with better effects
               _buildMainLogoAnimation(),
 
-              SizedBox(height: 0),
-
               // App name with better animation
-              _buildAppName(),
+              // _buildAppName(),
             ],
           ),
         ),
@@ -120,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen>
             top: position.dy,
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 250), // Very fast opacity
-              opacity: _currentLogoIndex == index ? 1.0 : 0.4,
+              opacity: _currentLogoIndex == index ? 1.0 : 0.1,
               child: Transform.scale(
                 scale: _currentLogoIndex == index
                     ? 1.15
@@ -172,22 +170,22 @@ class _SplashScreenState extends State<SplashScreen>
     return Offset(centerX + radius * cos(angle), centerY + radius * sin(angle));
   }
 
-  Widget _buildAppName() {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 500),
-      opacity: 1.0, // Always visible
-      child: const Text(
-        'NQ Connect',
-        style: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-          letterSpacing: 1.2,
-          shadows: [
-            Shadow(blurRadius: 10, color: Colors.white, offset: Offset(2, 2)),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildAppName() {
+  //   return AnimatedOpacity(
+  //     duration: const Duration(milliseconds: 500),
+  //     opacity: 1.0, // Always visible
+  //     child: const Text(
+  //       'NQ Connect',
+  //       style: TextStyle(
+  //         fontSize: 28,
+  //         fontWeight: FontWeight.bold,
+  //         color: Colors.black87,
+  //         letterSpacing: 1.2,
+  //         shadows: [
+  //           Shadow(blurRadius: 10, color: Colors.white, offset: Offset(2, 2)),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 }
