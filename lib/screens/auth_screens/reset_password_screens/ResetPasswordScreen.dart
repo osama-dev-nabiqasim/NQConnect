@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/utils/responsive.dart';
+import 'package:nqconnect/services/api_service.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -16,17 +17,60 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
-  void _resetPassword() {
+  void _resetPassword() async {
     if (_formKey.currentState!.validate()) {
-      String password = _passwordController.text.trim();
-      Get.snackbar(
-        "Success",
-        "Password Reset Successfully",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-      Get.offAllNamed("/login"); // Go back to login
+      setState(() {
+        isLoading = true;
+      });
+      final email = Get.arguments != null
+          ? Get.arguments['email'] as String?
+          : null;
+      final resetCode = Get.arguments != null
+          ? Get.arguments['reset_code'] as String?
+          : null;
+
+      if (email == null || resetCode == null) {
+        Get.snackbar(
+          "Error",
+          "Missing email or reset code",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      try {
+        await ApiService().resetPassword(
+          email,
+          resetCode,
+          _passwordController.text.trim(),
+        );
+        Get.snackbar(
+          "Success",
+          "Password Reset Successfully",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        // Clear stored reset_email/debug_otp if you like
+        await ApiService.storage.delete(key: 'reset_email');
+        await ApiService.storage.delete(key: 'debug_otp');
+
+        Get.offAllNamed("/login"); // Go back to login
+      } catch (e) {
+        Get.snackbar(
+          "Error",
+          e.toString(),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } finally {
+        setState(() {
+          /* optional: clear loading state */
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -58,8 +102,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               const Color.fromARGB(255, 87, 103, 116), // near white
               Color(0xFFF4F6F9), // light greyish
             ],
-            // begin: Alignment.topLeft,
-            // end: Alignment.bottomRight,
           ),
         ),
         child: SingleChildScrollView(
@@ -123,8 +165,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return "Please enter password";
-                              } else if (value.length < 6) {
-                                return "Password must be at least 6 characters";
+                              } else if (value.length < 5) {
+                                return "Password must be at least 5 characters";
                               }
                               return null;
                             },

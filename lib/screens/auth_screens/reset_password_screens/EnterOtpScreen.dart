@@ -58,16 +58,23 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       setState(() => _isLoading = true);
       try {
         final email = Get.arguments['email'];
-        await _apiService.verifyOtp(email, _emailotpController.text.trim());
+        final otp = _emailotpController.text.trim();
+        await _apiService.verifyOtp(email, otp);
+
         Get.snackbar(
           "Success",
           "OTP verified successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-        // 👉 OTP verify hone ke baad aap jo next screen dikhana chahte hain wahan navigate karein
-        Get.offNamed("/login");
+
+        // Navigate to Reset Password screen and pass email + otp
+        Get.offNamed(
+          "/resetpasswordscreen",
+          arguments: {'email': email, 'reset_code': otp},
+        );
       } catch (e) {
+        print(e);
         Get.snackbar(
           "Error",
           e.toString(),
@@ -79,57 +86,54 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       }
     }
   }
-  // void _verifyOtp() {
-  //   if (_formKey.currentState!.validate()) {
-  //     String emailOtp = _emailotpController.text.trim();
-  //     // String phoneOtp = _phoneotpController.text.trim();
 
-  //     // TODO: Add your OTP verification logic (API/controller call)
-  //     if (emailOtp == "123456") {
-  //       Get.snackbar(
-  //         "Success",
-  //         "OTP Verified Successfully",
-  //         backgroundColor: Colors.green,
-  //         colorText: Colors.white,
-  //       );
-  //       Get.offNamed("/resetpasswordscreen");
-  //     } else {
-  //       Get.snackbar(
-  //         "Error",
-  //         "Invalid OTP, please try again",
-  //         backgroundColor: Colors.red,
-  //         colorText: Colors.white,
-  //       );
-  //     }
-  //   }
+  // void _resendOtp() {
+  //   final email = Get.arguments['email'];
+  //   Get.snackbar(
+  //     "OTP Sent",
+  //     "A new code has been sent to your email and phone number.",
+  //     backgroundColor: Colors.transparent,
+  //     colorText: Colors.white,
+  //     titleText: Text(
+  //       "OTP Sent",
+  //       style: TextStyle(
+  //         color: Colors.black, // ✅ title color black
+  //         fontWeight: FontWeight.bold,
+  //         fontSize: 18,
+  //       ),
+  //     ),
+
+  //     messageText: Text(
+  //       "A new code has been sent to your email",
+  //       style: TextStyle(
+  //         color: Colors.black, // ✅ title color black
+  //         fontWeight: FontWeight.bold,
+  //         fontSize: 12,
+  //       ),
+  //     ),
+  //   );
+
+  //   _startTimer();
   // }
-
-  void _resendOtp() {
-    Get.snackbar(
-      "OTP Sent",
-      "A new code has been sent to your email and phone number.",
-      backgroundColor: Colors.transparent,
-      colorText: Colors.white,
-      titleText: Text(
+  void _resendOtp() async {
+    final email = Get.arguments['email'];
+    try {
+      await _apiService.forgotPassword(email);
+      Get.snackbar(
         "OTP Sent",
-        style: TextStyle(
-          color: Colors.black, // ✅ title color black
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      ),
-
-      messageText: Text(
-        "A new code has been sent to your email",
-        style: TextStyle(
-          color: Colors.black, // ✅ title color black
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-
-    _startTimer();
+        "A new code has been sent to your email.",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      _startTimer();
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override
@@ -218,7 +222,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            "We have sent a 6-digit code to your email.",
+                            "We have sent a 6-digit OTP to your email.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
@@ -231,9 +235,6 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                           _emailField(),
                           SizedBox(height: 12),
 
-                          // OTP Input
-                          // _phonenumberField(),
-                          // SizedBox(height: 20),
                           _isResendAvailable
                               ? TextButton(
                                   onPressed: _resendOtp,
@@ -353,7 +354,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       decoration: InputDecoration(
         counterText: "",
         prefixIcon: Icon(Icons.pin, color: Colors.white),
-        hintText: "Enter Email Code",
+        hintText: "Enter OTP Code",
         hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
         filled: true,
         fillColor: Colors.white.withOpacity(0.1),

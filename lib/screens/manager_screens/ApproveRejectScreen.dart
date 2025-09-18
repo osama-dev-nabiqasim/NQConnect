@@ -2,47 +2,76 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
+import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
-class ApproveRejectScreen extends StatelessWidget {
+class ApproveRejectScreen extends StatefulWidget {
   final String managerDepartment;
-  final SuggestionController controller = Get.find<SuggestionController>();
 
-  ApproveRejectScreen({super.key, required this.managerDepartment});
+  const ApproveRejectScreen({Key? key, required this.managerDepartment})
+    : super(key: key);
+
+  @override
+  State<ApproveRejectScreen> createState() => _ApproveRejectScreenState();
+}
+
+class _ApproveRejectScreenState extends State<ApproveRejectScreen> {
+  final SuggestionController controller = Get.find<SuggestionController>();
+  final UserController userController = Get.find<UserController>();
+
+  /// Track which cards are expanded
+  final RxSet<int> _expanded = <int>{}.obs;
+
+  void _vote(Suggestion suggestion, String type) async {
+    final suggestionId = suggestion.id.toString();
+    final employeeId = userController.employeeId.value;
+    try {
+      await controller.voteOnSuggestion(suggestionId, type, employeeId);
+    } catch (_) {
+      Get.snackbar("Error", "Failed to record vote");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Approve / Reject Suggestions"),
+        title: const Text("Approve / Reject Suggestions"),
         backgroundColor: AppColors.appbarColor[0],
         centerTitle: true,
       ),
       body: Obx(() {
         final deptSuggestions =
             controller.suggestions
-                .where((s) => s.department == managerDepartment)
+                .where((s) => s.department == widget.managerDepartment)
                 .toList()
               ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-        // final deptSuggestions = controller.getDepartmentSuggestions(managerDepartment);
-
         if (deptSuggestions.isEmpty) {
-          return Center(child: Text("No suggestions for your department!"));
+          return const Center(
+            child: Text("No suggestions for your department!"),
+          );
         }
 
         return ListView.builder(
+          padding: const EdgeInsets.all(12),
           itemCount: deptSuggestions.length,
-          padding: EdgeInsets.all(12),
           itemBuilder: (context, index) {
-            final Suggestion s = deptSuggestions[index];
+            final s = deptSuggestions[index];
+            final isExpanded = _expanded.contains(index);
 
             return Card(
-              margin: EdgeInsets.symmetric(vertical: 8),
+              margin: const EdgeInsets.symmetric(vertical: 6),
               elevation: 4,
-              child: ListTile(
+              child: ExpansionTile(
+                key: ValueKey(s.id),
+                initiallyExpanded: false,
+                onExpansionChanged: (open) {
+                  open ? _expanded.add(index) : _expanded.remove(index);
+                },
                 leading: Icon(
                   Icons.lightbulb_outline,
                   color: s.status == "Pending"
@@ -55,79 +84,88 @@ class ApproveRejectScreen extends StatelessWidget {
                   s.title,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                // subtitle: Text(
-                //   "${s.description}\nStatus: ${s.status}\nBy: ${s.employeeId}",
-                // ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      s.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4),
-                    // Text("Status: ${s.status}"),
-                    Text('Created: ${s.createdAt.toString().split(' ')[0]}'),
-                    Text("By: ${s.employeeId}"),
-                  ],
+                subtitle: Text(
+                  s.status,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: s.status == "Approved"
+                        ? Colors.green
+                        : s.status == "Rejected"
+                        ? Colors.red
+                        : Colors.orange,
+                  ),
                 ),
-                isThreeLine: true,
-                trailing: s.status == "Pending"
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.check, color: Colors.green),
-                            onPressed: () async {
-                              await controller.approveSuggestionById(
-                                s.id.toString(),
-                              );
-                              Get.snackbar(
-                                "Approved",
-                                "${s.title} approved successfully",
-                                backgroundColor: Colors.green,
-                                colorText: Colors.white,
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.close, color: Colors.red),
-                            onPressed: () async {
-                              await controller.rejectSuggestionById(
-                                s.id.toString(),
-                              );
-                              Get.snackbar(
-                                "Rejected",
-                                "${s.title} rejected successfully",
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                              );
-                            },
-                          ),
-                        ],
-                      )
-                    : Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                children: [
+                  // Expanded details
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          s.description,
+                          style: const TextStyle(color: Colors.black87),
                         ),
-                        decoration: BoxDecoration(
-                          color: s.status == "Approved"
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
+                        const SizedBox(height: 6),
+                        Text(
+                          "By: ${s.employeeName}  —  ${s.employeeId}",
+                          style: const TextStyle(color: Colors.black54),
                         ),
-                        child: Text(
-                          s.status,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: s.status == "Approved"
-                                ? Colors.green
-                                : Colors.red,
-                          ),
+                        Text(
+                          "Date: ${DateFormat('dd MMM yyyy').format(s.createdAt.toLocal())}",
+                          style: const TextStyle(color: Colors.black54),
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        if (s.status == "Pending")
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                ),
+                                onPressed: () async {
+                                  await controller.approveSuggestionById(
+                                    s.id.toString(),
+                                  );
+                                  _vote(s, 'like'); // manager's vote
+                                  Get.snackbar(
+                                    "Approved",
+                                    "${s.title} approved successfully",
+                                    backgroundColor: Colors.green,
+                                    colorText: Colors.white,
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () async {
+                                  await controller.rejectSuggestionById(
+                                    s.id.toString(),
+                                  );
+                                  Get.snackbar(
+                                    "Rejected",
+                                    "${s.title} rejected successfully",
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                  );
+                                },
+                              ),
+                            ],
+                          )
+                        else
+                          Container(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             );
           },

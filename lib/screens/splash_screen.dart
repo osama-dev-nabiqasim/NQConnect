@@ -1,191 +1,80 @@
-// ignore_for_file: unused_import, use_super_parameters, library_private_types_in_public_api
-
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
-
+class SplashVariant1 extends StatefulWidget {
+  const SplashVariant1({super.key});
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashVariant1> createState() => _SplashVariant1State();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  int _currentLogoIndex = 0;
-  bool _isDisposed = false;
-
-  final List<String> _logoPaths = [
+class _SplashVariant1State extends State<SplashVariant1> {
+  final logos = [
     'assets/images/NQLogo.png',
-    'assets/images/EtdcLogo.JPG',
-    'assets/images/PplLogo.JPG',
-    'assets/images/SplLogo.JPG',
-    'assets/images/SurgeLogo.JPG',
+    'assets/images/EtdcLogo.png',
+    'assets/images/PplLogo.png',
+    'assets/images/SplLogo.png',
+    'assets/images/SurgeLogo.png',
   ];
+  int index = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 4000), // Slower animation
-      vsync: this,
-    );
-
-    // Start logo sequence
-    _startLogoSequence();
-
-    // Navigate after all animations
-    Future.delayed(Duration(milliseconds: 3200), () {
-      if (mounted && !_isDisposed) {
-        Get.offNamed('/login');
-      }
-    });
+    _cycle();
   }
 
-  void _startLogoSequence() async {
-    for (int i = 0; i < _logoPaths.length; i++) {
-      await Future.delayed(
-        const Duration(milliseconds: 300),
-      ); // Slower transition
-      if (mounted && !_isDisposed) {
-        setState(() {
-          _currentLogoIndex = i;
-        });
-      }
-      if (!_isDisposed) {
-        // 👈 Check before reset/forward
-        _controller.reset();
-        _controller.forward();
-      }
-
-      // Wait for this logo to complete before showing next
-      await Future.delayed(Duration(milliseconds: 300));
+  void _cycle() async {
+    for (var i = 0; i < logos.length; i++) {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return;
+      setState(() => index = i);
     }
-  }
-
-  @override
-  void dispose() {
-    _isDisposed = true;
-    _controller.dispose();
-    super.dispose();
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) Get.offNamed('/login');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.backgroundColor,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: const [0.3, 0.7],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Main animated logo with better effects
-              _buildMainLogoAnimation(),
-
-              // App name with better animation
-              // _buildAppName(),
+      body: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(seconds: 5), // slow gradient transition
+        builder: (context, t, _) {
+          // interpolate between background → primary colors
+          final gradient = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.lerp(
+                AppColors.backgroundColor.first,
+                AppColors.primaryColor.first,
+                t,
+              )!,
+              Color.lerp(
+                AppColors.backgroundColor.last,
+                AppColors.primaryColor.last,
+                t,
+              )!,
             ],
-          ),
-        ),
-      ),
-    );
-  }
+          );
 
-  Widget _buildMainLogoAnimation() {
-    return SizedBox(
-      width: Responsive.width(context) * 1,
-      height: Responsive.height(context) * 0.5,
-      child: Stack(
-        alignment: Alignment.center,
-        children: List.generate(_logoPaths.length, (index) {
-          final position = _calculateLogoPosition(index);
-          return AnimatedPositioned(
-            duration: const Duration(
-              milliseconds: 300,
-            ), // Very fast position change
-            curve: Curves.easeOut,
-            left: position.dx,
-            top: position.dy,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 250), // Very fast opacity
-              opacity: _currentLogoIndex == index ? 1.0 : 0.2,
-              child: Transform.scale(
-                scale: _currentLogoIndex == index
-                    ? 1.15
-                    : 0.8, // Less extreme scaling
-                alignment: Alignment.center,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _currentLogoIndex = index;
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _currentLogoIndex == index
-                              ? Colors.blueAccent.withOpacity(0.3)
-                              : Colors.grey.withOpacity(0.2),
-                          blurRadius: _currentLogoIndex == index ? 12 : 6,
-                          spreadRadius: _currentLogoIndex == index ? 2 : 0.5,
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      _logoPaths[index],
-                      width: Responsive.width(context) * 0.2,
-                      height: Responsive.height(context) * 0.04,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+          return Container(
+            decoration: BoxDecoration(gradient: gradient),
+            child: Center(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 800),
+                child: AnimatedScale(
+                  key: ValueKey(index),
+                  duration: const Duration(milliseconds: 800),
+                  scale: 1.2,
+                  child: Image.asset(logos[index], width: 200),
                 ),
               ),
             ),
           );
-        }),
+        },
       ),
     );
   }
-
-  Offset _calculateLogoPosition(int index) {
-    final centerX = Responsive.width(context) * 0.4;
-    final centerY = Responsive.height(context) * 0.2;
-    final radius = Responsive.width(context) * 0.3;
-
-    final angle = 2 * 3.1416 * index / _logoPaths.length;
-    return Offset(centerX + radius * cos(angle), centerY + radius * sin(angle));
-  }
-
-  // Widget _buildAppName() {
-  //   return AnimatedOpacity(
-  //     duration: const Duration(milliseconds: 500),
-  //     opacity: 1.0, // Always visible
-  //     child: const Text(
-  //       'NQ Connect',
-  //       style: TextStyle(
-  //         fontSize: 28,
-  //         fontWeight: FontWeight.bold,
-  //         color: Colors.black87,
-  //         letterSpacing: 1.2,
-  //         shadows: [
-  //           Shadow(blurRadius: 10, color: Colors.white, offset: Offset(2, 2)),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 }

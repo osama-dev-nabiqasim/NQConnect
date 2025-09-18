@@ -87,15 +87,24 @@ class ApiService {
       );
     } catch (e) {
       print('Login error: $e');
-      throw Exception(
-        'Unable to connect to server. Please check your internet connection.',
-      );
+      throw Exception(e);
+    }
+  }
+
+  Future<int> fetchEmployeeCount() async {
+    final uri = Uri.parse("$baseUrl/api/auth/count");
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['count'] ?? 0;
+    } else {
+      throw Exception("Failed to load employee count");
     }
   }
 
   Future<Map<String, dynamic>> forgotPassword(String email) async {
     try {
-      await baseUrl;
       final response = await http
           .post(
             Uri.parse('$baseUrl/auth/forgot-password'),
@@ -111,6 +120,18 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
+          // Save email locally for the flow
+          await storage.write(key: 'reset_email', value: email);
+
+          // If server returned debug_otp (dev only), save it too for quick testing
+          if (data.containsKey('debug_otp')) {
+            await storage.write(
+              key: 'debug_otp',
+              value: data['debug_otp'].toString(),
+            );
+            print('Saved debug_otp to secure storage (dev only).');
+          }
+
           return data;
         } else {
           throw Exception(
@@ -132,7 +153,7 @@ class ApiService {
 
   Future<void> verifyOtp(String email, String otp) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/verify-otp'),
+      Uri.parse('$baseUrl/auth/verify-otp'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'reset_code': otp}),
     );

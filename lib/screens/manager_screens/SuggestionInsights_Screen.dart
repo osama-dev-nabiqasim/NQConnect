@@ -6,13 +6,23 @@ import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
 import 'package:nqconnect/utils/responsive.dart';
+import 'package:intl/intl.dart';
 
-class SuggestionInsightsScreen extends StatelessWidget {
+class SuggestionInsightsScreen extends StatefulWidget {
+  const SuggestionInsightsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SuggestionInsightsScreen> createState() =>
+      _SuggestionInsightsScreenState();
+}
+
+class _SuggestionInsightsScreenState extends State<SuggestionInsightsScreen> {
   final SuggestionController suggestionController =
       Get.find<SuggestionController>();
   final UserController userController = Get.find<UserController>();
 
-  SuggestionInsightsScreen({super.key});
+  /// Track which cards are expanded
+  final RxSet<int> _expanded = <int>{}.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +41,7 @@ class SuggestionInsightsScreen extends StatelessWidget {
         final deptSuggestions =
             suggestionController
                 .getDepartmentSuggestions(managerDept)
-                .where((s) => s.status == "Approved") // sirf approved
+                .where((s) => s.status == "Approved")
                 .toList()
               ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -46,100 +56,116 @@ class SuggestionInsightsScreen extends StatelessWidget {
           itemCount: deptSuggestions.length,
           itemBuilder: (context, index) {
             final Suggestion suggestion = deptSuggestions[index];
+            final bool isExpanded = _expanded.contains(index);
 
             return Card(
-              margin: const EdgeInsets.symmetric(vertical: 12),
+              margin: const EdgeInsets.symmetric(vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
               elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      suggestion.title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
+              child: ExpansionTile(
+                key: ValueKey(suggestion.id),
+                onExpansionChanged: (open) {
+                  open ? _expanded.add(index) : _expanded.remove(index);
+                },
+                title: Text(
+                  suggestion.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  "👍 ${suggestion.likes}   👎 ${suggestion.dislikes}",
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+                childrenPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                children: [
+                  // Description
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
                       suggestion.description,
                       style: const TextStyle(color: Colors.black87),
                     ),
-                    const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 12),
 
-                    // 🔹 Chart
-                    SizedBox(
-                      height: 180,
-                      child: BarChart(
-                        BarChartData(
-                          alignment: BarChartAlignment.spaceAround,
-                          maxY:
-                              (suggestion.likes > suggestion.dislikes
-                                  ? suggestion.likes.toDouble()
-                                  : suggestion.dislikes.toDouble()) +
-                              2,
-                          barTouchData: BarTouchData(enabled: true),
-                          titlesData: FlTitlesData(
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: true),
-                            ),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (value, meta) {
-                                  switch (value.toInt()) {
-                                    case 0:
-                                      return const Text("👍 Likes");
-                                    case 1:
-                                      return const Text("👎 Dislikes");
-                                    default:
-                                      return const Text("");
-                                  }
-                                },
-                              ),
+                  // Created date
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Created: ${DateFormat('dd MMM yyyy').format(suggestion.createdAt.toLocal())}",
+                      style: const TextStyle(color: Colors.black54),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Chart
+                  SizedBox(
+                    height: 180,
+                    child: BarChart(
+                      BarChartData(
+                        alignment: BarChartAlignment.spaceAround,
+                        maxY:
+                            (suggestion.likes > suggestion.dislikes
+                                ? suggestion.likes.toDouble()
+                                : suggestion.dislikes.toDouble()) +
+                            2,
+                        barTouchData: BarTouchData(enabled: true),
+                        titlesData: FlTitlesData(
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: true),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                switch (value.toInt()) {
+                                  case 0:
+                                    return const Text("👍 Likes");
+                                  case 1:
+                                    return const Text("👎 Dislikes");
+                                  default:
+                                    return const Text("");
+                                }
+                              },
                             ),
                           ),
-                          borderData: FlBorderData(show: false),
-                          barGroups: [
-                            BarChartGroupData(
-                              x: 0,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: suggestion.likes.toDouble(),
-                                  color: Colors.green,
-                                  width: 28,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              ],
-                            ),
-                            BarChartGroupData(
-                              x: 1,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: suggestion.dislikes.toDouble(),
-                                  color: Colors.red,
-                                  width: 28,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              ],
-                            ),
-                          ],
                         ),
+                        borderData: FlBorderData(show: false),
+                        barGroups: [
+                          BarChartGroupData(
+                            x: 0,
+                            barRods: [
+                              BarChartRodData(
+                                toY: suggestion.likes.toDouble(),
+                                color: Colors.green,
+                                width: 28,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ],
+                          ),
+                          BarChartGroupData(
+                            x: 1,
+                            barRods: [
+                              BarChartRodData(
+                                toY: suggestion.dislikes.toDouble(),
+                                color: Colors.red,
+                                width: 28,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-
-                    const SizedBox(height: 12),
-                    Text(
-                      "👍 ${suggestion.likes}   👎 ${suggestion.dislikes}",
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },

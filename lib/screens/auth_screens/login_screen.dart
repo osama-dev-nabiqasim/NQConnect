@@ -93,24 +93,31 @@ class _LoginScreenState extends State<LoginScreen> {
         // 👇 Navigate to dashboard
         Get.offNamed('/dashboard');
       } catch (e) {
-        String errorMessage = e.toString().replaceAll("Exception: ", "");
-        if (errorMessage.contains("Server is offline") ||
-            errorMessage.contains("unreachable") ||
-            errorMessage.contains("not responding")) {
-          errorMessage =
-              "Server is currently offline. Please try again later or contact admin.";
-        } else if (errorMessage.contains("Invalid Employee ID or Password")) {
-          errorMessage = "Invalid Employee ID or Password. Please try again.";
+        // Convert to a friendly message
+        String msg = e.toString().replaceFirst('Exception: ', '').trim();
+        final lower = msg.toLowerCase();
+        if (lower.contains('socketexception') ||
+            lower.contains('failed host lookup')) {
+          msg = "No internet connection. Please check your network.";
+        } else if (lower.contains('timeout')) {
+          msg = "Request timed out. Please try again.";
+        } else if (lower.contains('Invalid employee id') ||
+            lower.contains('invalid employee id or password')) {
+          msg = "Invalid Employee ID or password. Please try again.";
+        } else if (lower.contains('server is offline') ||
+            lower.contains('unreachable')) {
+          // ✅ more specific match
+          msg = "Server is currently offline. Please try again later.";
         }
-        print(e);
+
         Get.snackbar(
           "Login Failed",
-          errorMessage,
+          msg,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
-          duration: Duration(seconds: 3),
-          icon: Icon(Icons.error_outline, color: Colors.white),
+          icon: const Icon(Icons.error_outline, color: Colors.white),
+          duration: const Duration(seconds: 3),
         );
       } finally {
         setState(() => isButtonEnabled = true);

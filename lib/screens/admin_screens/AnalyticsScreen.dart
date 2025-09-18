@@ -96,7 +96,7 @@ class AnalyticsDashboard extends StatelessWidget {
                   _buildMetricCard(
                     context,
                     "Total Employees",
-                    controller.totalEmployees.toString(),
+                    controller.totalEmployees.value.toString(),
                     Icons.people,
                     Colors.blue,
                   ),

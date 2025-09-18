@@ -106,14 +106,21 @@
 //   }
 // }
 
+// ignore_for_file: avoid_print
+
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
+import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
+import 'package:nqconnect/services/api_service.dart';
 
 class AnalyticsController extends GetxController {
   final SuggestionController suggestionController =
       Get.find<SuggestionController>();
+  final UserController userController = Get.find<UserController>();
   var isLoading = false.obs;
+  final userService = ApiService();
+  var totalEmployees = 0.obs; // 👈 observable
 
   @override
   void onInit() {
@@ -121,8 +128,19 @@ class AnalyticsController extends GetxController {
     // Listen to suggestion changes
     suggestionController.suggestions.listen((_) {
       refreshAnalytics();
+      fetchTotalEmployees();
     });
     refreshAnalytics();
+  }
+
+  Future<void> fetchTotalEmployees() async {
+    try {
+      final count = await userService.fetchEmployeeCount();
+      totalEmployees.value = count;
+      print(count);
+    } catch (e) {
+      print("❌ Failed to fetch employee count: $e");
+    }
   }
 
   void refreshAnalytics() {
@@ -160,10 +178,15 @@ class AnalyticsController extends GetxController {
     return deptCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
   }
 
-  int get totalEmployees {
-    // Placeholder: Fetch from a UserController or API
-    return 50; // Replace with actual logic
-  }
+  // int get totalEmployees {
+  //   // Placeholder: Fetch from a UserController or API
+  //   return 25; // Replace with actual logic
+  // }
+
+  // int get totalEmployees {
+  //   // previously: return 25;
+  //   return userController.users.where((u) => u.role == "employee").length;
+  // }
 
   Map<String, int> get departmentWiseSuggestions {
     final deptCounts = <String, int>{};

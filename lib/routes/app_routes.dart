@@ -18,7 +18,7 @@ import 'package:nqconnect/screens/splash_screen.dart';
 
 class AppRoutes {
   static final List<GetPage> routes = [
-    GetPage(name: '/splash', page: () => const SplashScreen()),
+    GetPage(name: '/splash', page: () => const SplashVariant1()),
     GetPage(name: '/login', page: () => LoginScreen()),
     GetPage(name: '/forgotpassword', page: () => ForgotPasswordScreen()),
     GetPage(name: '/enterotpscreen', page: () => EnterOtpScreen()),

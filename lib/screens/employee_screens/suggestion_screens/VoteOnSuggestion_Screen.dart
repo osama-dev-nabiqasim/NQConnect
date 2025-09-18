@@ -1,6 +1,7 @@
 // lib/screens/vote_on_suggestion_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
@@ -16,7 +17,9 @@ class VoteOnSuggestionScreen extends StatefulWidget {
 class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
   final SuggestionController suggestionController =
       Get.find<SuggestionController>();
+
   final UserController userController = Get.find<UserController>();
+
   // Track user vote locally
   Map<String, String> userVotes = {};
 
@@ -156,7 +159,7 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                         //   style: const TextStyle(color: Colors.black54),
                         // ),
                         Text(
-                          "Created: ${suggestion.createdAt.toLocal().toString().split(' ')[0]}",
+                          "Created: ${DateFormat('dd MMM yyyy').format(suggestion.createdAt.toLocal())}",
                           style: const TextStyle(color: Colors.black54),
                         ),
                         if (suggestion.image != null) ...[

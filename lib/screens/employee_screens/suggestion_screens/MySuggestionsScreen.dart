@@ -66,8 +66,15 @@ class MySuggestionsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(suggestion.description),
-                    SizedBox(height: 5),
+                    SizedBox(height: 8),
                     Text("Category: ${suggestion.category}"),
+                    SizedBox(height: 2),
+
+                    Text(
+                      'Date: ${suggestion.createdAt.toString().split(' ')[0]}',
+                    ),
+                    SizedBox(height: 2),
+
                     Text(
                       "Status: ${suggestion.status}",
                       style: TextStyle(
