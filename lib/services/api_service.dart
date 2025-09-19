@@ -92,9 +92,11 @@ class ApiService {
   }
 
   Future<int> fetchEmployeeCount() async {
-    final uri = Uri.parse("$baseUrl/api/auth/count");
+    final uri = Uri.parse("$baseUrl/auth/count");
+    print("🌐 Calling: $uri");
     final response = await http.get(uri);
-
+    print("🌐 Response status: ${response.statusCode}");
+    print("🌐 Response body: ${response.body}");
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return data['count'] ?? 0;

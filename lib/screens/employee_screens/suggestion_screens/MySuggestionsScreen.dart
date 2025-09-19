@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/utils/responsive.dart';
@@ -69,9 +70,8 @@ class MySuggestionsScreen extends StatelessWidget {
                     SizedBox(height: 8),
                     Text("Category: ${suggestion.category}"),
                     SizedBox(height: 2),
-
                     Text(
-                      'Date: ${suggestion.createdAt.toString().split(' ')[0]}',
+                      "Date: ${DateFormat('dd MMM yyyy').format(suggestion.createdAt)}",
                     ),
                     SizedBox(height: 2),
 

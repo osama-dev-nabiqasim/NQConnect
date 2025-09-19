@@ -217,7 +217,12 @@ class SuggestionManagementScreen extends StatelessWidget {
               //   onPressed: () => controller.bulkArchive(true),
               // ),
               IconButton(
-                icon: const Icon(Icons.archive, color: Colors.orange),
+                icon: Icon(
+                  controller.currentView.value == 'archived'
+                      ? Icons.unarchive
+                      : Icons.archive,
+                  color: Colors.orange,
+                ),
                 onPressed: () {
                   final isArchivedTab =
                       controller.currentView.value == 'archived';

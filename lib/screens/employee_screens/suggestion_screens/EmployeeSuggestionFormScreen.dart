@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, prefer_const_constructors, deprecated_member_use
+// ignore_for_file: file_names, prefer_const_constructors, deprecated_member_use, avoid_print
 
 import 'dart:convert';
 import 'dart:ui';
@@ -151,12 +151,13 @@ class _EmployeeSuggestionFormScreenState
                             ),
                           ),
                           Text(
-                            "Department: ${userController.department.value}",
+                            "Email: ${userController.email}",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
                           ),
+
                           SizedBox(height: 20),
 
                           // Title

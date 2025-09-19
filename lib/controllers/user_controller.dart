@@ -8,15 +8,24 @@ class UserController extends GetxController {
   var userName = ''.obs;
   var role = ''.obs;
   var department = ''.obs;
+  var email = ''.obs;
   var token = ''.obs; // 👈 Add this
 
   // 👇 Save user + token
-  void setUserData(String? id, String? name, String? userRole, String? dept) {
+  void setUserData(
+    String? id,
+    String? name,
+    String? userRole,
+    String? dept,
+    String? userEmail,
+  ) {
     employeeId.value = id ?? ''; // 👈 Save kar raha hai
     userName.value = name ?? '';
     role.value = userRole ?? '';
     department.value = dept ?? '';
-    _saveToPrefs(id, name, userRole, dept);
+    email.value = userEmail ?? '';
+
+    _saveToPrefs(id, name, userRole, dept, userEmail);
   }
 
   // 👇 Load from local storage (optional — for auto-login)
@@ -31,6 +40,7 @@ class UserController extends GetxController {
           user['name'] ?? '',
           user['role'] ?? '',
           user['department'] ?? '',
+          user['email'] ?? '',
         );
       }
     } catch (e) {
@@ -57,6 +67,7 @@ class UserController extends GetxController {
     String? name,
     String? role,
     String? dept,
+    String? email,
   ) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
@@ -66,6 +77,7 @@ class UserController extends GetxController {
         'name': name,
         'role': role,
         'department': dept,
+        'email': email,
       }),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:nqconnect/controllers/analytics_controller.dart';
 import 'package:nqconnect/utils/analytics_card.dart';
 import 'package:nqconnect/utils/responsive.dart'; // Assuming this exists
@@ -78,6 +79,11 @@ class AnalyticsDashboard extends StatelessWidget {
                     controller.topPerformingDepartment,
                     Icons.emoji_events,
                     Colors.amber,
+                    onLongPress: () => _showInfoDialog(
+                      context,
+                      "Top Department",
+                      "Department with the highest number of approved suggestions.",
+                    ),
                   ),
                   _buildMetricCard(
                     context,
@@ -85,6 +91,11 @@ class AnalyticsDashboard extends StatelessWidget {
                     controller.mostActiveDepartment,
                     Icons.trending_up,
                     Colors.purple,
+                    onLongPress: () => _showInfoDialog(
+                      context,
+                      "Most Active Department",
+                      "Department with higher number of suggestions.",
+                    ),
                   ),
                   _buildMetricCard(
                     context,
@@ -132,40 +143,83 @@ class AnalyticsDashboard extends StatelessWidget {
     );
   }
 
+  // Widget _buildMetricCard(
+  //   BuildContext context,
+  //   String title,
+  //   String value,
+  //   IconData icon,
+  //   Color color,
+  // ) {
+  //   return Card(
+  //     elevation: 3,
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(12),
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  //           Icon(icon, size: 30, color: color),
+  //           const SizedBox(height: 8),
+  //           Text(
+  //             value,
+  //             style: TextStyle(
+  //               fontSize: Responsive.font(context, 18),
+  //               fontWeight: FontWeight.bold,
+  //               color: Colors.black87,
+  //             ),
+  //           ),
+  //           const SizedBox(height: 4),
+  //           Text(
+  //             title,
+  //             style: TextStyle(
+  //               fontSize: Responsive.font(context, 12),
+  //               color: Colors.grey[600],
+  //             ),
+  //             textAlign: TextAlign.center,
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildMetricCard(
     BuildContext context,
     String title,
     String value,
     IconData icon,
-    Color color,
-  ) {
-    return Card(
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 30, color: color),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: Responsive.font(context, 18),
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+    Color color, {
+    VoidCallback? onLongPress,
+  }) {
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: Card(
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 30, color: color),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: Responsive.font(context, 18),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: Responsive.font(context, 12),
-                color: Colors.grey[600],
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: Responsive.font(context, 12),
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -221,7 +275,9 @@ class AnalyticsDashboard extends StatelessWidget {
                   ),
                   title: Text(suggestion.title),
                   subtitle: Text(
-                    "${suggestion.likes} 👍 • ${suggestion.department}",
+                    "${suggestion.likes} 👍 • "
+                    "${suggestion.department} • "
+                    "${DateFormat('dd MMM yyyy').format(suggestion.createdAt)}",
                   ),
                   trailing: Chip(
                     label: Text("+${suggestion.likes - suggestion.dislikes}"),
@@ -266,5 +322,28 @@ class AnalyticsDashboard extends StatelessWidget {
         ),
       );
     });
+  }
+
+  void _showInfoDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color.fromARGB(32, 0, 0, 0),
+        title: Text(
+          title,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        // actions: [
+        //   TextButton(
+        //     onPressed: () => Navigator.pop(context),
+        //     child: const Text("OK"),
+        //   ),
+        // ],
+      ),
+    );
   }
 }

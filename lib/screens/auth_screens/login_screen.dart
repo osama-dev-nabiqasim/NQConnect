@@ -72,6 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
           user['name'] ?? '',
           user['role'] ?? '',
           user['department'] ?? '',
+          user['email'] ?? '',
         );
 
         print(

@@ -9,7 +9,6 @@
 //       Get.find<SuggestionController>();
 //   final UserController userController = Get.find<UserController>();
 
-//   // Total Suggestions Count
 //   int get totalSuggestions => suggestionController.suggestions.length;
 
 //   // Suggestions by Status
@@ -119,25 +118,25 @@ class AnalyticsController extends GetxController {
       Get.find<SuggestionController>();
   final UserController userController = Get.find<UserController>();
   var isLoading = false.obs;
-  final userService = ApiService();
+  final ApiService _apiService = ApiService();
   var totalEmployees = 0.obs; // 👈 observable
 
   @override
   void onInit() {
     super.onInit();
+    fetchTotalEmployees();
     // Listen to suggestion changes
     suggestionController.suggestions.listen((_) {
       refreshAnalytics();
-      fetchTotalEmployees();
     });
     refreshAnalytics();
   }
 
   Future<void> fetchTotalEmployees() async {
     try {
-      final count = await userService.fetchEmployeeCount();
+      final count = await _apiService.fetchEmployeeCount();
       totalEmployees.value = count;
-      print(count);
+      print("🔎 Total employees fetched: $count");
     } catch (e) {
       print("❌ Failed to fetch employee count: $e");
     }

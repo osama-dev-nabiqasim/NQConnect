@@ -122,6 +122,8 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
           itemBuilder: (context, index) {
             final suggestion = unvotedSuggestions[index];
             final currentVote = userVotes[suggestion.id.toString()];
+            final totallikes = suggestion.likes;
+            final totaldislikes = suggestion.dislikes;
 
             return Card(
               elevation: 3,
@@ -138,7 +140,9 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                     fontSize: 16,
                   ),
                 ),
-                subtitle: Text("Category: ${suggestion.category}"),
+                subtitle: Text(
+                  "Category: ${suggestion.category} • 👍 $totallikes • 👎 $totaldislikes",
+                ),
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -162,6 +166,7 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                           "Created: ${DateFormat('dd MMM yyyy').format(suggestion.createdAt.toLocal())}",
                           style: const TextStyle(color: Colors.black54),
                         ),
+
                         if (suggestion.image != null) ...[
                           const SizedBox(height: 8),
                           ClipRRect(
