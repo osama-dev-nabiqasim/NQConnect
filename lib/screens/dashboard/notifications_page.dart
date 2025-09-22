@@ -15,7 +15,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   final NotificationController controller = Get.put(NotificationController());
   final userController = Get.find<UserController>();
 
-  // For selection mode
   final RxBool isSelecting = false.obs;
   final RxSet<int> selectedNotifications = <int>{}.obs;
 
@@ -33,38 +32,24 @@ class _NotificationsPageState extends State<NotificationsPage> {
         child: Obx(() {
           return AppBar(
             backgroundColor: AppColors.appbarColor[0],
-            title: Text(
-              isSelecting.value
-                  ? '${selectedNotifications.length} selected'
-                  : 'Notifications',
-            ),
+            title: Text('Notifications'),
             actions: [
+              // MARK ALL AS READ BUTTON
               if (!isSelecting.value)
                 IconButton(
                   icon: Icon(Icons.mark_email_read),
-                  tooltip: 'Mark all as read',
+                  tooltip: "Mark all as read",
                   onPressed: () =>
-                      controller.markAsRead(userController.employeeId.toJson()),
+                      controller.markAllAsRead(userController.employeeId.value),
                 ),
+              // DELETE BUTTON when selecting
               if (isSelecting.value)
                 IconButton(
                   icon: Icon(Icons.delete),
-                  tooltip: 'Delete selected',
-                  onPressed: selectedNotifications.isEmpty
-                      ? null
-                      : () async {
-                          final ids = selectedNotifications.toList();
-                          await controller.markAsRead(
-                            userController.employeeId.toJson(),
-                          );
-                          selectedNotifications.clear();
-                          isSelecting.value = false;
-                        },
-                ),
-              if (isSelecting.value)
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () {
+                  tooltip: "Delete selected",
+                  onPressed: () async {
+                    if (selectedNotifications.isEmpty) return;
+                    await controller.bulkDelete(selectedNotifications.toList());
                     selectedNotifications.clear();
                     isSelecting.value = false;
                   },

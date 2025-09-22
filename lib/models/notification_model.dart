@@ -6,7 +6,7 @@ class AppNotification {
   final String title;
   final String message;
   final String type;
-  final bool isRead;
+  bool isRead;
   final String? relatedId;
   final DateTime createdAt;
 
@@ -16,7 +16,8 @@ class AppNotification {
     required this.title,
     required this.message,
     required this.type,
-    required this.isRead,
+    // required this.isRead,
+    this.isRead = false,
     this.relatedId,
     required this.createdAt,
   });
@@ -49,7 +50,9 @@ class AppNotification {
       title: (json['title'] ?? '').toString(),
       message: (json['message'] ?? '').toString(),
       type: (json['type'] ?? '').toString(),
-      isRead: parsedIsRead,
+      isRead: json['is_read'] ?? false,
+
+      // isRead: parsedIsRead,
       relatedId: json['related_id']?.toString(),
       createdAt: createdAt,
     );
