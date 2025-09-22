@@ -2,10 +2,13 @@
 
 // ignore_for_file: avoid_print, await_only_futures
 
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
+
+import 'package:nqconnect/controllers/notification_controller.dart';
 
 class ApiService {
   // -------------------- For Emulator---------------------------------------
@@ -60,6 +63,12 @@ class ApiService {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
           await storage.write(key: 'jwt_token', value: data['token']);
+
+          // -------------------------------------------
+          Get.find<NotificationController>().fetchNotifications(employeeId);
+
+          // -------------------------------------------
+
           return data;
         } else {
           throw Exception('Invalid Employee ID or Password. Please try again.');
@@ -462,6 +471,53 @@ class ApiService {
     } catch (e) {
       print('Bulk delete error: $e');
       throw Exception('Network error: $e');
+    }
+  }
+
+  Future<List<dynamic>> getNotifications(String userId) async {
+    final token = await _getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/notifications/$userId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    print('Fetching notifications from: $baseUrl/notifications/$userId');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'];
+    } else {
+      print('Notifications error ${response.statusCode}: ${response.body}');
+      throw Exception('Failed to fetch notifications');
+    }
+  }
+
+  Future<void> markNotificationRead(String id) async {
+    final token = await _getToken();
+    final response = await http.put(
+      Uri.parse('$baseUrl/notifications/$id/read'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to mark notification as read');
+    }
+  }
+
+  Future<void> markAllRead(String userId) async {
+    final token = await _getToken();
+    final response = await http.put(
+      Uri.parse('$baseUrl/notifications/read-all/$userId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to mark all notifications as read');
     }
   }
 }

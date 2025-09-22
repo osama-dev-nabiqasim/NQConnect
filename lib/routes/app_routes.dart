@@ -8,6 +8,7 @@ import 'package:nqconnect/screens/auth_screens/reset_password_screens/ResetPassw
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/forgot_password.dart';
 import 'package:nqconnect/screens/dashboard/dashboard_screen.dart';
 import 'package:nqconnect/screens/auth_screens/login_screen.dart';
+import 'package:nqconnect/screens/dashboard/notifications_page.dart';
 import 'package:nqconnect/screens/employee_screens/suggestion_screens/MySuggestionsScreen.dart';
 import 'package:nqconnect/screens/employee_screens/suggestion_screens/VoteOnSuggestion_Screen.dart';
 import 'package:nqconnect/screens/manager_screens/ApproveRejectScreen.dart';
@@ -24,6 +25,8 @@ class AppRoutes {
     GetPage(name: '/enterotpscreen', page: () => EnterOtpScreen()),
     GetPage(name: '/suggestions', page: () => EmployeeSuggestionFormScreen()),
     GetPage(name: '/resetpasswordscreen', page: () => ResetPasswordScreen()),
+
+    GetPage(name: '/notifications', page: () => NotificationsPage()),
 
     // GetPage(name: "/suggestion_list", page: () => SuggestionListScreen()),
     GetPage(name: '/dashboard', page: () => DashboardScreen()),

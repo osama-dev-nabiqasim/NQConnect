@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:nqconnect/controllers/notification_controller.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/routes/app_routes.dart';
@@ -23,13 +24,14 @@ void main() async {
     await Get.putAsync(() async {
       final controller = UserController();
       await controller.loadFromPrefs();
+
       return controller;
     });
   } catch (e) {
     print('⚠️ UserController failed to load: $e');
     Get.put(UserController()); // Fallback
   }
-
+  Get.put(NotificationController());
   // 👇 4. Now put other controllers (sync is safe now)
   Get.put(SuggestionController());
 

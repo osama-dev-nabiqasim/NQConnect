@@ -1,6 +1,9 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/utils/responsive.dart';
+import 'package:particles_flutter/component/particle/particle.dart';
+import 'package:particles_flutter/particles_engine.dart' show Particles;
 
 class SplashVariant1 extends StatefulWidget {
   const SplashVariant1({super.key});
@@ -59,22 +62,106 @@ class _SplashVariant1State extends State<SplashVariant1> {
             ],
           );
 
-          return Container(
-            decoration: BoxDecoration(gradient: gradient),
-            child: Center(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 800),
-                child: AnimatedScale(
-                  key: ValueKey(index),
-                  duration: const Duration(milliseconds: 800),
-                  scale: 1.2,
-                  child: Image.asset(logos[index], width: 200),
+          // return Container(
+          //   decoration: BoxDecoration(gradient: gradient),
+          //   child: Center(
+          //     child: AnimatedSwitcher(
+          //       duration: const Duration(milliseconds: 800),
+          //       child: AnimatedScale(
+          //         key: ValueKey(index),
+          //         duration: const Duration(milliseconds: 800),
+          //         scale: 1.2,
+          //         child: Image.asset(logos[index], width: 200),
+          //       ),
+          //     ),
+          //   ),
+          // );
+          return Stack(
+            children: [
+              // Background with gradient and logo
+              Container(
+                decoration: BoxDecoration(gradient: gradient),
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 800),
+                    child: AnimatedScale(
+                      key: ValueKey(index),
+                      duration: const Duration(milliseconds: 800),
+                      scale: 1.2,
+                      child: Image.asset(logos[index], width: 200),
+                    ),
+                  ),
                 ),
               ),
-            ),
+
+              // Particle effect overlay
+              Particles(
+                awayRadius: 850,
+                particles: createParticles(), // List of particles
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                onTapAnimation: true,
+                awayAnimationDuration: const Duration(milliseconds: 100),
+                awayAnimationCurve: Curves.linear,
+                enableHover: true,
+                hoverRadius: 90,
+                connectDots: false,
+              ),
+              // Glowing blurred bottom gradient (like your image)
+              // Positioned(
+              //   left: 0,
+              //   right: 0,
+              //   bottom: 0,
+              //   height: 150,
+              //   child: ClipRRect(
+              //     borderRadius: const BorderRadius.only(
+              //       topLeft: Radius.circular(250),
+              //       topRight: Radius.circular(250),
+              //     ),
+              //     child: BackdropFilter(
+              //       filter: ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0),
+              //       child: Container(
+              //         decoration: BoxDecoration(
+              //           gradient: LinearGradient(
+              //             begin: Alignment.bottomCenter,
+              //             end: Alignment.topCenter,
+              //             colors: [
+              //               AppColors.primaryColor.last.withOpacity(0.4),
+              //               Colors.transparent,
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+            ],
           );
         },
       ),
     );
+  }
+
+  List<Particle> createParticles() {
+    var rng = Random();
+    List<Particle> particles = [];
+    for (int i = 0; i < 140; i++) {
+      particles.add(
+        Particle(
+          color: const Color.fromARGB(44, 15, 89, 180),
+          size: rng.nextDouble() * 10,
+          velocity: Offset(
+            rng.nextDouble() * 200 * randomSign(),
+            rng.nextDouble() * 200 * randomSign(),
+          ),
+        ),
+      );
+    }
+    return particles;
+  }
+
+  double randomSign() {
+    var rng = Random();
+    return rng.nextBool() ? 1 : -1;
   }
 }

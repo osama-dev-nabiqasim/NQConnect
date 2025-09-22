@@ -128,19 +128,44 @@ class SuggestionManagementScreen extends StatelessWidget {
     );
   }
 
+  // Widget _buildDepartmentFilter() {
+  //   return Obx(
+  //     () => DropdownButton<String>(
+  //       value: controller.selectedDepartment.value,
+  //       items: controller.availableDepartments.map((dept) {
+  //         return DropdownMenuItem(
+  //           value: dept,
+  //           child: Text(dept == 'all' ? 'All Departments' : dept),
+  //         );
+  //       }).toList(),
+  //       onChanged: (value) => controller.selectedDepartment.value = value!,
+  //     ),
+  //   );
+  // }
+
   Widget _buildDepartmentFilter() {
-    return Obx(
-      () => DropdownButton<String>(
+    return Obx(() {
+      final depts = controller.availableDepartments
+          .toSet()
+          .toList(); // ensure unique
+      final current = controller.selectedDepartment.value;
+
+      // ✅ If current value is not in the list anymore, reset it
+      if (!depts.contains(current)) {
+        controller.selectedDepartment.value = 'all';
+      }
+
+      return DropdownButton<String>(
         value: controller.selectedDepartment.value,
-        items: controller.availableDepartments.map((dept) {
+        items: depts.map((dept) {
           return DropdownMenuItem(
             value: dept,
             child: Text(dept == 'all' ? 'All Departments' : dept),
           );
         }).toList(),
         onChanged: (value) => controller.selectedDepartment.value = value!,
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildCategoryFilter() {

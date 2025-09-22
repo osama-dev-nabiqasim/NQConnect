@@ -2,6 +2,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nqconnect/controllers/notification_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/controllers/dashboard_controller.dart';
 import 'package:nqconnect/models/section_model.dart';
@@ -178,6 +179,33 @@ class DashboardScreen extends StatelessWidget {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         elevation: 0,
+        actions: [
+          Obx(() {
+            final notifController = Get.put(NotificationController());
+            final count = notifController.unreadCount;
+            return Stack(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.notifications, color: Colors.black87),
+                  onPressed: () => Get.toNamed('/notifications'),
+                ),
+                if (count > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: CircleAvatar(
+                      radius: 8,
+                      backgroundColor: Colors.red,
+                      child: Text(
+                        '$count',
+                        style: TextStyle(fontSize: 10, color: Colors.white),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+        ],
         title: Text(
           "Dashboard",
           style: TextStyle(

@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, prefer_const_constructors, deprecated_member_use, avoid_print
+// ignore_for_file: file_names, prefer_const_constructors, deprecated_member_use, avoid_print, depend_on_referenced_packages
 
 import 'dart:io';
 import 'dart:ui';
