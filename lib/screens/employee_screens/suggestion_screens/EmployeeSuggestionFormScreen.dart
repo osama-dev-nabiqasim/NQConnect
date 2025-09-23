@@ -128,12 +128,17 @@ class _EmployeeSuggestionFormScreenState
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
+          duration: Duration(seconds: 2),
         );
 
         await Get.find<SuggestionController>().fetchSuggestions();
         Get.offNamed("/my_suggestions");
       } else {
-        Get.snackbar("Error", "Failed to submit suggestion ($status)");
+        Get.snackbar(
+          "Error",
+          "Failed to submit suggestion ($status)",
+          duration: Duration(seconds: 2),
+        );
       }
     } catch (e) {
       Get.snackbar("Error", "Network error: $e");

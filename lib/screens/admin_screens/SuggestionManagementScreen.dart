@@ -514,7 +514,9 @@ class SuggestionManagementScreen extends StatelessWidget {
               children: [
                 Text(suggestion.description),
                 const SizedBox(height: 16),
-                Text('Employee: ${suggestion.employeeName}'),
+                Text('Employee name: ${suggestion.employeeName}'),
+                Text('Employee ID: ${suggestion.employeeId}'),
+
                 Text('Department: ${suggestion.department}'),
                 Text('Category: ${suggestion.category}'),
                 Text('Status: ${suggestion.status}'),
@@ -544,9 +546,9 @@ class SuggestionManagementScreen extends StatelessWidget {
                       subtitle: Text(
                         'By ${history.changedBy} on ${history.changedAt.toString().split(' ')[0]}',
                       ),
-                      trailing: history.comments != null
-                          ? Text(history.comments!)
-                          : null,
+                      // trailing: history.comments != null
+                      //     ? Text(history.comments!)
+                      //     : null,
                     ),
                   )
                 else

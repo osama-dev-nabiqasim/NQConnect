@@ -31,7 +31,11 @@ class _ApproveRejectScreenState extends State<ApproveRejectScreen> {
     try {
       await controller.voteOnSuggestion(suggestionId, type, employeeId);
     } catch (_) {
-      Get.snackbar("Error", "Failed to record vote");
+      Get.snackbar(
+        "Error",
+        "Failed to record vote",
+        duration: Duration(seconds: 2),
+      );
     }
   }
 
@@ -138,6 +142,7 @@ class _ApproveRejectScreenState extends State<ApproveRejectScreen> {
                                     "${s.title} approved successfully",
                                     backgroundColor: Colors.green,
                                     colorText: Colors.white,
+                                    duration: Duration(seconds: 2),
                                   );
                                 },
                               ),
@@ -155,6 +160,7 @@ class _ApproveRejectScreenState extends State<ApproveRejectScreen> {
                                     "${s.title} rejected successfully",
                                     backgroundColor: Colors.red,
                                     colorText: Colors.white,
+                                    duration: Duration(seconds: 2),
                                   );
                                 },
                               ),

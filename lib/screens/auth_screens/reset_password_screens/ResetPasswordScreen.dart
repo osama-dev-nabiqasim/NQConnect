@@ -37,6 +37,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           "Missing email or reset code",
           backgroundColor: Colors.red,
           colorText: Colors.white,
+          duration: Duration(seconds: 2),
         );
         return;
       }
@@ -52,6 +53,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           "Password Reset Successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
+          duration: Duration(seconds: 2),
         );
         // Clear stored reset_email/debug_otp if you like
         await ApiService.storage.delete(key: 'reset_email');
@@ -64,6 +66,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           e.toString(),
           backgroundColor: Colors.red,
           colorText: Colors.white,
+          duration: Duration(seconds: 2),
         );
       } finally {
         setState(() {

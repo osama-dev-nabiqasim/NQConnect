@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nqconnect/utils/responsive.dart';
 import 'package:particles_flutter/component/particle/particle.dart';
-import 'package:particles_flutter/particles_engine.dart' show Particles;
 
 class SplashVariant1 extends StatefulWidget {
   const SplashVariant1({super.key});

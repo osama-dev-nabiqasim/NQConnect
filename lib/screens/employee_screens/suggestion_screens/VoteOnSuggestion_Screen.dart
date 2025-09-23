@@ -69,9 +69,14 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
         "Your vote has been recorded",
         backgroundColor: type == "like" ? Colors.green : Colors.red,
         colorText: Colors.white,
+        duration: Duration(seconds: 2),
       );
     } catch (e) {
-      Get.snackbar("Error", "Failed to record vote");
+      Get.snackbar(
+        "Error",
+        "Failed to record vote",
+        duration: Duration(seconds: 2),
+      );
       // Revert local state on error
       setState(() {
         userVotes.remove(suggestionId);
@@ -208,8 +213,10 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                                 icon: const Icon(Icons.thumb_up),
                                 label: const Text("Like"),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey.shade200,
-                                  foregroundColor: Colors.black,
+                                  backgroundColor:
+                                      Colors.green, // ✅ green background
+                                  foregroundColor:
+                                      Colors.white, // white text/icon
                                 ),
                               ),
                               ElevatedButton.icon(
@@ -217,8 +224,10 @@ class _VoteOnSuggestionScreenState extends State<VoteOnSuggestionScreen> {
                                 icon: const Icon(Icons.thumb_down),
                                 label: const Text("Dislike"),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey.shade200,
-                                  foregroundColor: Colors.black,
+                                  backgroundColor:
+                                      Colors.red, // ✅ green background
+                                  foregroundColor:
+                                      Colors.white, // white text/icon
                                 ),
                               ),
                             ],

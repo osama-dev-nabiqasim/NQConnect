@@ -66,6 +66,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           "OTP verified successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
+          duration: Duration(seconds: 2),
         );
 
         // Navigate to Reset Password screen and pass email + otp
@@ -80,6 +81,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           e.toString(),
           backgroundColor: Colors.red,
           colorText: Colors.white,
+          duration: Duration(seconds: 2),
         );
       } finally {
         setState(() => _isLoading = false);
@@ -124,6 +126,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         "A new code has been sent to your email.",
         backgroundColor: Colors.green,
         colorText: Colors.white,
+        duration: Duration(seconds: 2),
       );
       _startTimer();
     } catch (e) {
@@ -132,6 +135,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        duration: Duration(seconds: 2),
       );
     }
   }

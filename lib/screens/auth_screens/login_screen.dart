@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 2),
         );
 
         // 👇 Clear fields
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: Colors.red,
           colorText: Colors.white,
           icon: const Icon(Icons.error_outline, color: Colors.white),
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 2),
         );
       } finally {
         setState(() => isButtonEnabled = true);

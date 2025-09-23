@@ -32,6 +32,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           response['message'] ?? "Reset code sent to your email",
           backgroundColor: Colors.green,
           colorText: Colors.white,
+          duration: Duration(seconds: 2),
         );
         Get.toNamed(
           "/enterotpscreen",
@@ -43,6 +44,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           e.toString(),
           backgroundColor: Colors.red,
           colorText: Colors.white,
+          duration: Duration(seconds: 2),
         );
       } finally {
         setState(() => _isLoading = false);

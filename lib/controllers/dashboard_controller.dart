@@ -53,9 +53,9 @@ class DashboardController extends GetxController {
       route: "/approvals",
     ),
     Section(
-      name: "Employee Activity Feed",
-      icon: Icons.feed,
-      route: "/activity_feed",
+      name: "Vote on Suggestions",
+      icon: Icons.how_to_vote,
+      route: "/manager_vote_on_suggestion",
     ),
     Section(
       name: "Notifications",

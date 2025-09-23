@@ -96,7 +96,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
               child: Obx(() {
                 final isSelected = selectedNotifications.contains(n.id);
                 return ListTile(
-                  title: Text(n.title),
+                  title: Text(
+                    n.title,
+                    style: TextStyle(
+                      // color: AppColors.primaryColor.first,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   subtitle: Text(n.message),
                   trailing: isSelecting.value
                       ? Checkbox(
