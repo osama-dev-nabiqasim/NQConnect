@@ -1,4 +1,4 @@
-// ignore_for_file: use_key_in_widget_constructors
+// ignore_for_file: use_key_in_widget_constructors, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,6 +24,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
     controller.fetchNotifications(userController.employeeId.value);
   }
 
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,8 +45,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 IconButton(
                   icon: Icon(Icons.mark_email_read),
                   tooltip: "Mark all as read",
-                  onPressed: () =>
-                      controller.markAllAsRead(userController.employeeId.value),
+                  onPressed: () async {
+                    await controller.markAllAsRead(
+                      userController.employeeId.value,
+                    );
+                    _showSnack("Notifications marked as read");
+                  },
                 ),
               // DELETE BUTTON when selecting
               if (isSelecting.value)
@@ -49,7 +59,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   tooltip: "Delete selected",
                   onPressed: () async {
                     if (selectedNotifications.isEmpty) return;
+                    print(
+                      "Delete button pressed, selectedIds=$selectedNotifications",
+                    );
                     await controller.bulkDelete(selectedNotifications.toList());
+                    _showSnack("Selected notifications deleted");
                     selectedNotifications.clear();
                     isSelecting.value = false;
                   },
@@ -63,7 +77,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
           return Center(child: CircularProgressIndicator());
         }
         if (controller.notifications.isEmpty) {
-          return Center(child: Text('No notifications'));
+          print("No notifications found");
+          return Center(child: Text('No new notification'));
         }
 
         return ListView.builder(
@@ -74,17 +89,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
             return GestureDetector(
               onLongPress: () {
+                print("Long press on notification id=${n.id}");
                 isSelecting.value = true;
                 selectedNotifications.add(n.id);
               },
-              child: Obx(
-                () => ListTile(
+              child: Obx(() {
+                final isSelected = selectedNotifications.contains(n.id);
+                return ListTile(
                   title: Text(n.title),
                   subtitle: Text(n.message),
                   trailing: isSelecting.value
                       ? Checkbox(
                           value: isSelected,
                           onChanged: (v) {
+                            print("Checkbox changed for id=${n.id}, value=$v");
+
                             if (v == true) {
                               selectedNotifications.add(n.id);
                             } else {
@@ -97,17 +116,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       : Icon(Icons.fiber_new, color: Colors.red),
                   onTap: () {
                     if (isSelecting.value) {
+                      print("Tapped in selection mode on id=${n.id}");
+
                       if (isSelected) {
                         selectedNotifications.remove(n.id);
                       } else {
                         selectedNotifications.add(n.id);
                       }
                     } else {
+                      print("Tapped to mark as read id=${n.id}");
                       controller.markAsRead(n.id);
+                      _showSnack("Notification marked as read");
                     }
                   },
-                ),
-              ),
+                );
+              }),
             );
           },
         );

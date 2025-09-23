@@ -12,10 +12,10 @@ import 'package:nqconnect/controllers/notification_controller.dart';
 
 class ApiService {
   // -------------------- For Emulator---------------------------------------
-  final String baseUrl = 'http://10.0.2.2:5000/api';
+  // final String baseUrl = 'http://10.0.2.2:5000/api';
 
   // ------------------ For physical device  -------------------------------------
-  // final String baseUrl = 'http://10.10.5.126:5000/api';
+  final String baseUrl = 'http://10.10.5.172:5000/api';
 
   // final String baseUrl = 'http://${await storage.read(key: 'server_ip') ?? '10.10.5.126'}:5000/api';
 
@@ -501,7 +501,10 @@ class ApiService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      body: json.encode({"id": id}),
     );
+    print("markAsRead API response: ${response.statusCode}");
+
     if (response.statusCode != 200) {
       throw Exception('Failed to mark notification as read');
     }

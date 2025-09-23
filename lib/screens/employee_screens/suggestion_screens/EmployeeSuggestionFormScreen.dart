@@ -96,7 +96,7 @@ class _EmployeeSuggestionFormScreenState
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      final uri = Uri.parse('http://10.0.2.2:5000/api/suggestions');
+      final uri = Uri.parse('http://10.10.5.172:5000/api/suggestions');
       final request = http.MultipartRequest('POST', uri)
         ..fields['title'] = _titleController.text.trim()
         ..fields['description'] = _descriptionController.text.trim()
