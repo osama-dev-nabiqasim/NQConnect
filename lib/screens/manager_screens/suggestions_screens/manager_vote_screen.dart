@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:nqconnect/controllers/suggestion_controller.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
+import 'package:nqconnect/utils/api_constants.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
 class ManagerVoteScreen extends StatefulWidget {
@@ -13,9 +14,11 @@ class ManagerVoteScreen extends StatefulWidget {
   State<ManagerVoteScreen> createState() => _ManagerVoteScreenState();
 }
 
-class _ManagerVoteScreenState extends State<ManagerVoteScreen> {
+class _ManagerVoteScreenState extends State<ManagerVoteScreen>
+    with WidgetsBindingObserver {
   final suggestionController = Get.find<SuggestionController>();
   final userController = Get.find<UserController>();
+  final String baseUrl = ApiConstants.imagebaseUrl;
 
   /// keep track of votes this manager has cast
   final Map<String, String> managerVotes = {};
@@ -23,7 +26,23 @@ class _ManagerVoteScreenState extends State<ManagerVoteScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadManagerVotes();
+  }
+
+  // 🔑 whenever app/page comes to foreground
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadManagerVotes(); // ✅ re-fetch on resume
+    }
+    super.didChangeAppLifecycleState(state);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   Future<void> _loadManagerVotes() async {
@@ -109,75 +128,142 @@ class _ManagerVoteScreenState extends State<ManagerVoteScreen> {
           return const Center(child: Text("No new suggestions to vote on."));
         }
 
-        return ListView.builder(
-          itemCount: unvoted.length,
-          padding: const EdgeInsets.all(12),
-          itemBuilder: (_, i) {
-            final s = unvoted[i];
+        return RefreshIndicator(
+          onRefresh: _loadManagerVotes,
+          child: ListView.builder(
+            itemCount: unvoted.length,
+            padding: const EdgeInsets.all(12),
+            itemBuilder: (_, i) {
+              final s = unvoted[i];
 
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ExpansionTile(
-                tilePadding: const EdgeInsets.all(12),
-                title: Text(
-                  s.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                subtitle: Text(
-                  "Dept: ${s.department} • 👍 ${s.likes} • 👎 ${s.dislikes}",
-                ),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(s.description),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Created: ${DateFormat('dd MMM yyyy').format(s.createdAt.toLocal())}",
-                          style: const TextStyle(color: Colors.black54),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
+                child: ExpansionTile(
+                  tilePadding: const EdgeInsets.all(12),
+                  title: Text(
+                    s.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    "Dept: ${s.department} • 👍 ${s.likes} • 👎 ${s.dislikes}",
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(s.description),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Created: ${DateFormat('dd MMM yyyy').format(s.createdAt.toLocal())}",
+                            style: const TextStyle(color: Colors.black54),
+                          ),
+                          if (s.image != null && s.image!.isNotEmpty) ...[
+                            const SizedBox(height: 8),
                             ElevatedButton.icon(
-                              onPressed: () => _vote(s, "like"),
-                              icon: const Icon(Icons.thumb_up),
-                              label: const Text("Like"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Colors.green, // ✅ green background
-                                foregroundColor:
-                                    Colors.white, // white text/icon
+                              icon: const Icon(
+                                Icons.image,
+                                color: Colors.black,
                               ),
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: () => _vote(s, "dislike"),
-                              icon: const Icon(Icons.thumb_down),
-                              label: const Text("Dislike"),
+                              label: const Text(
+                                "View Image",
+                                style: TextStyle(color: Colors.black),
+                              ),
+
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FullScreenImageView(
+                                      imageUrl: "$baseUrl${s.image!}",
+                                    ),
+                                  ),
+                                );
+                              },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Colors.red, // ✅ green background
-                                foregroundColor:
-                                    Colors.white, // white text/icon
+                                backgroundColor: const Color.fromARGB(
+                                  63,
+                                  255,
+                                  255,
+                                  255,
+                                ),
                               ),
                             ),
                           ],
-                        ),
-                      ],
+
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () => _vote(s, "like"),
+                                icon: const Icon(Icons.thumb_up),
+                                label: const Text("Like"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Colors.green, // ✅ green background
+                                  foregroundColor:
+                                      Colors.white, // white text/icon
+                                ),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () => _vote(s, "dislike"),
+                                icon: const Icon(Icons.thumb_down),
+                                label: const Text("Dislike"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Colors.red, // ✅ green background
+                                  foregroundColor:
+                                      Colors.white, // white text/icon
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         );
       }),
+    );
+  }
+}
+
+class FullScreenImageView extends StatelessWidget {
+  final String imageUrl;
+  const FullScreenImageView({super.key, required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          panEnabled: true,
+          minScale: 0.5,
+          maxScale: 4.0,
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const Text(
+              'Image not available',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

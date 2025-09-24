@@ -5,12 +5,49 @@ import 'package:nqconnect/controllers/suggestion_management_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
 import 'package:nqconnect/utils/responsive.dart';
 
-class SuggestionManagementScreen extends StatelessWidget {
+class SuggestionManagementScreen extends StatefulWidget {
+  SuggestionManagementScreen({super.key});
+
+  @override
+  State<SuggestionManagementScreen> createState() =>
+      _SuggestionManagementScreenState();
+}
+
+class _SuggestionManagementScreenState extends State<SuggestionManagementScreen>
+    with WidgetsBindingObserver {
   final SuggestionManagementController controller = Get.put(
     SuggestionManagementController(),
   );
 
-  SuggestionManagementScreen({super.key});
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // 🔄 Initial fetch when screen is first shown
+    controller.suggestionController.fetchSuggestions();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 🔄 Fetch again whenever this screen is re-entered
+    controller.suggestionController.fetchSuggestions();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 🔄 When app returns from background
+    if (state == AppLifecycleState.resumed) {
+      controller.suggestionController.fetchSuggestions();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,18 +78,22 @@ class SuggestionManagementScreen extends StatelessWidget {
           }),
         ],
       ),
-      body: Column(
-        children: [
-          _buildFilterSection(context),
-          Obx(() {
-            if (controller.isSelecting.value) {
-              return _buildBulkActionBar();
-            } else {
-              return const SizedBox.shrink();
-            }
-          }),
-          Expanded(child: _buildSuggestionsList()),
-        ],
+      body: RefreshIndicator(
+        onRefresh: controller.suggestionController.fetchSuggestions,
+
+        child: Column(
+          children: [
+            _buildFilterSection(context),
+            Obx(() {
+              if (controller.isSelecting.value) {
+                return _buildBulkActionBar();
+              } else {
+                return const SizedBox.shrink();
+              }
+            }),
+            Expanded(child: _buildSuggestionsList()),
+          ],
+        ),
       ),
       floatingActionButton: Obx(() {
         if (controller.isSelecting.value) {
@@ -127,21 +168,6 @@ class SuggestionManagementScreen extends StatelessWidget {
       ),
     );
   }
-
-  // Widget _buildDepartmentFilter() {
-  //   return Obx(
-  //     () => DropdownButton<String>(
-  //       value: controller.selectedDepartment.value,
-  //       items: controller.availableDepartments.map((dept) {
-  //         return DropdownMenuItem(
-  //           value: dept,
-  //           child: Text(dept == 'all' ? 'All Departments' : dept),
-  //         );
-  //       }).toList(),
-  //       onChanged: (value) => controller.selectedDepartment.value = value!,
-  //     ),
-  //   );
-  // }
 
   Widget _buildDepartmentFilter() {
     return Obx(() {
@@ -229,18 +255,6 @@ class SuggestionManagementScreen extends StatelessWidget {
           ),
           Row(
             children: [
-              // IconButton(
-              //   icon: const Icon(Icons.check, color: Colors.green),
-              //   onPressed: () => _showBulkActionDialog('Approved'),
-              // ),
-              // IconButton(
-              //   icon: const Icon(Icons.close, color: Colors.red),
-              //   onPressed: () => _showBulkActionDialog('Rejected'),
-              // ),
-              // IconButton(
-              //   icon: const Icon(Icons.archive, color: Colors.orange),
-              //   onPressed: () => controller.bulkArchive(true),
-              // ),
               IconButton(
                 icon: Icon(
                   controller.currentView.value == 'archived'
@@ -292,34 +306,6 @@ class SuggestionManagementScreen extends StatelessWidget {
       ),
     );
   }
-
-  // void _showBulkActionDialog(String action) {
-  //   final commentsController = TextEditingController();
-  //   Get.dialog(
-  //     AlertDialog(
-  //       title: Text('$action Selected Suggestions'),
-  //       content: TextField(
-  //         controller: commentsController,
-  //         decoration: const InputDecoration(
-  //           hintText: 'Add comments (optional)',
-  //           border: OutlineInputBorder(),
-  //         ),
-  //         maxLines: 3,
-  //       ),
-  //       actions: [
-  //         TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-  //         TextButton(
-  //           onPressed: () {
-  //             controller.bulkUpdateStatus(action, commentsController.text);
-  //             Get.back();
-  //             Get.snackbar('$action complete', 'Selected suggestions updated');
-  //           },
-  //           child: Text(action),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildSuggestionsList() {
     return Obx(() {
@@ -546,9 +532,6 @@ class SuggestionManagementScreen extends StatelessWidget {
                       subtitle: Text(
                         'By ${history.changedBy} on ${history.changedAt.toString().split(' ')[0]}',
                       ),
-                      // trailing: history.comments != null
-                      //     ? Text(history.comments!)
-                      //     : null,
                     ),
                   )
                 else

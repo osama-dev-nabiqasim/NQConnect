@@ -11,7 +11,8 @@ class NotificationsPage extends StatefulWidget {
   State<NotificationsPage> createState() => _NotificationsPageState();
 }
 
-class _NotificationsPageState extends State<NotificationsPage> {
+class _NotificationsPageState extends State<NotificationsPage>
+    with WidgetsBindingObserver {
   final NotificationController controller = Get.put(NotificationController());
   final userController = Get.find<UserController>();
 
@@ -21,7 +22,28 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // controller.fetchNotifications(userController.employeeId.value);
+    _loadNotifications();
+  }
+
+  void _loadNotifications() {
     controller.fetchNotifications(userController.employeeId.value);
+  }
+
+  /// 🔄 When app comes back to foreground, re-fetch notifications
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadNotifications();
+    }
+    super.didChangeAppLifecycleState(state);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   void _showSnack(String message) {
@@ -81,64 +103,70 @@ class _NotificationsPageState extends State<NotificationsPage> {
           return Center(child: Text('No new notification'));
         }
 
-        return ListView.builder(
-          itemCount: controller.notifications.length,
-          itemBuilder: (context, i) {
-            final n = controller.notifications[i];
-            final isSelected = selectedNotifications.contains(n.id);
+        return RefreshIndicator(
+          onRefresh: () async => _loadNotifications(),
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: controller.notifications.length,
+            itemBuilder: (context, i) {
+              final n = controller.notifications[i];
+              final isSelected = selectedNotifications.contains(n.id);
 
-            return GestureDetector(
-              onLongPress: () {
-                print("Long press on notification id=${n.id}");
-                isSelecting.value = true;
-                selectedNotifications.add(n.id);
-              },
-              child: Obx(() {
-                final isSelected = selectedNotifications.contains(n.id);
-                return ListTile(
-                  title: Text(
-                    n.title,
-                    style: TextStyle(
-                      // color: AppColors.primaryColor.first,
-                      fontWeight: FontWeight.bold,
+              return GestureDetector(
+                onLongPress: () {
+                  print("Long press on notification id=${n.id}");
+                  isSelecting.value = true;
+                  selectedNotifications.add(n.id);
+                },
+                child: Obx(() {
+                  final isSelected = selectedNotifications.contains(n.id);
+                  return ListTile(
+                    title: Text(
+                      n.title,
+                      style: TextStyle(
+                        // color: AppColors.primaryColor.first,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  subtitle: Text(n.message),
-                  trailing: isSelecting.value
-                      ? Checkbox(
-                          value: isSelected,
-                          onChanged: (v) {
-                            print("Checkbox changed for id=${n.id}, value=$v");
+                    subtitle: Text(n.message),
+                    trailing: isSelecting.value
+                        ? Checkbox(
+                            value: isSelected,
+                            onChanged: (v) {
+                              print(
+                                "Checkbox changed for id=${n.id}, value=$v",
+                              );
 
-                            if (v == true) {
-                              selectedNotifications.add(n.id);
-                            } else {
-                              selectedNotifications.remove(n.id);
-                            }
-                          },
-                        )
-                      : n.isRead
-                      ? null
-                      : Icon(Icons.fiber_new, color: Colors.red),
-                  onTap: () {
-                    if (isSelecting.value) {
-                      print("Tapped in selection mode on id=${n.id}");
+                              if (v == true) {
+                                selectedNotifications.add(n.id);
+                              } else {
+                                selectedNotifications.remove(n.id);
+                              }
+                            },
+                          )
+                        : n.isRead
+                        ? null
+                        : Icon(Icons.fiber_new, color: Colors.red),
+                    onTap: () {
+                      if (isSelecting.value) {
+                        print("Tapped in selection mode on id=${n.id}");
 
-                      if (isSelected) {
-                        selectedNotifications.remove(n.id);
+                        if (isSelected) {
+                          selectedNotifications.remove(n.id);
+                        } else {
+                          selectedNotifications.add(n.id);
+                        }
                       } else {
-                        selectedNotifications.add(n.id);
+                        print("Tapped to mark as read id=${n.id}");
+                        controller.markAsRead(n.id);
+                        _showSnack("Notification marked as read");
                       }
-                    } else {
-                      print("Tapped to mark as read id=${n.id}");
-                      controller.markAsRead(n.id);
-                      _showSnack("Notification marked as read");
-                    }
-                  },
-                );
-              }),
-            );
-          },
+                    },
+                  );
+                }),
+              );
+            },
+          ),
         );
       }),
     );

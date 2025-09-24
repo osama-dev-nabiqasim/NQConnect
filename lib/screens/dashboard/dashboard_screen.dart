@@ -242,24 +242,10 @@ class DashboardScreen extends StatelessWidget {
           ),
 
           // 🔹 Blob Top-Left
-          Positioned(
-            top: -50,
-            left: -50,
-            child: Opacity(
-              opacity: 0.1, // subtle effect
-              child: GradientRotatingCircle(),
-            ),
-          ),
+          Positioned(top: -80, left: -80, child: GradientRotatingCircle()),
 
           // 🔹 Blob Bottom-Right
-          Positioned(
-            bottom: -50,
-            right: -50,
-            child: Opacity(
-              opacity: 0.05, // subtle effect
-              child: GradientRotatingCircle(),
-            ),
-          ),
+          // Positioned(bottom: -50, right: -50, child: GradientRotatingCircle()),
 
           // 🔹 Foreground content
           Column(

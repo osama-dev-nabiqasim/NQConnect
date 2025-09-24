@@ -37,10 +37,10 @@ class _GradientRotatingCircleState extends State<GradientRotatingCircle>
           shape: BoxShape.circle,
           gradient: SweepGradient(
             colors: [
-              Colors.teal,
-              Colors.cyan,
-              Colors.blueAccent,
-              Colors.teal, // loop back
+              const Color.fromARGB(41, 0, 150, 135),
+              const Color.fromARGB(115, 0, 187, 212),
+              const Color.fromARGB(30, 68, 137, 255),
+              const Color.fromARGB(146, 0, 150, 135), // loop back
             ],
             stops: [0.0, 0.4, 0.7, 1.0],
           ),

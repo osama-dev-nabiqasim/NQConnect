@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/services/socket_service.dart';
+import 'package:nqconnect/utils/api_constants.dart';
 import '../models/notification_model.dart';
 import '../services/api_service.dart';
 
@@ -20,7 +21,8 @@ class NotificationController extends GetxController {
   // final String baseUrl = 'http://10.0.2.2:5000/api';
 
   // ------------------ For physical device  -------------------------------------
-  final String baseUrl = 'http://10.10.5.172:5000/api';
+  // final String baseUrl = 'http://10.10.5.188:5000/api';
+  final String baseUrl = ApiConstants.baseUrl;
 
   // ------------------ For physical device  -------------------------------------
   // final String baseUrl = 'http://10.10.5.126:5000/api';

@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
+import 'package:nqconnect/utils/api_constants.dart';
 import 'package:nqconnect/utils/responsive.dart';
 import 'package:http_parser/http_parser.dart';
 import '../../../controllers/suggestion_controller.dart';
@@ -20,7 +21,8 @@ class EmployeeSuggestionFormScreen extends StatefulWidget {
 }
 
 class _EmployeeSuggestionFormScreenState
-    extends State<EmployeeSuggestionFormScreen> {
+    extends State<EmployeeSuggestionFormScreen>
+    with WidgetsBindingObserver {
   final _descriptionController = TextEditingController();
   final UserController userController = Get.find<UserController>();
   final _formKey = GlobalKey<FormState>();
@@ -31,72 +33,45 @@ class _EmployeeSuggestionFormScreenState
   File? _pickedImage;
 
   final List<String> categories = ["Workplace", "Process", "Team", "Other"];
-
-  // void _pickImage() async {
-  //   // for now dummy, later integrate with image_picker
-  //   setState(() {
-  //     _imagePath = "assets/images/sample.png"; // placeholder
-  //   });
-  // }
-
-  Future<void> _pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (picked != null) setState(() => _pickedImage = File(picked.path));
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _refreshSuggestions(); // ✅ initial fetch
   }
 
-  // void _submitForm() async {
-  //   if (_formKey.currentState!.validate()) {
-  //     try {
-  //       // 👇 Prepare data for API
-  //       final data = {
-  //         'title': _titleController.text.trim(),
-  //         'description': _descriptionController.text.trim(),
-  //         'category': _selectedCategory ?? "Workplace",
-  //         'employee_id': userController.employeeId.value,
-  //         'employee_name': userController.userName.value,
-  //         'department': userController.department.value,
-  //       };
-  //       print('✅ SUBMIT DATA: $data');
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
-  //       // 👇 Call backend API (you need to implement this in ApiService)
-  //       final response = await http.post(
-  //         Uri.parse(
-  //           'http://10.0.2.2:5000/api/suggestions',
-  //         ), // 👈 Your backend URL
-  //         headers: {'Content-Type': 'application/json'},
-  //         body: jsonEncode(data),
-  //       );
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshSuggestions(); // ✅ refresh when app comes to foreground
+    }
+  }
 
-  //       print('✅ RESPONSE STATUS: ${response.statusCode}'); // 👈 DEBUG
-  //       print('✅ RESPONSE BODY: ${response.body}'); // 👈 DEBUG
+  Future<void> _refreshSuggestions() async {
+    await Get.find<SuggestionController>().fetchSuggestions();
+  }
 
-  //       if (response.statusCode == 201 || response.statusCode == 200) {
-  //         Get.snackbar(
-  //           "Success",
-  //           "Suggestion sent for review",
-  //           snackPosition: SnackPosition.BOTTOM,
-  //           backgroundColor: Colors.green,
-  //           colorText: Colors.white,
-  //         );
-
-  //         final suggestionController = Get.find<SuggestionController>();
-  //         await suggestionController.fetchSuggestions();
-
-  //         Get.offNamed("/my_suggestions"); // Navigate to list
-  //       } else {
-  //         Get.snackbar("Error", "Failed to submit suggestion");
-  //       }
-  //     } catch (e) {
-  //       Get.snackbar("Error", "Network error: $e");
-  //     }
-  //   }
-  // }
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.camera, // <-- Camera instead of gallery
+      preferredCameraDevice: CameraDevice.rear,
+      imageQuality: 85,
+    );
+    if (picked != null) setState(() => _pickedImage = File(picked.path));
+  }
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      final uri = Uri.parse('http://10.10.5.172:5000/api/suggestions');
+      final uri = Uri.parse('${ApiConstants.baseUrl}/suggestions');
       final request = http.MultipartRequest('POST', uri)
         ..fields['title'] = _titleController.text.trim()
         ..fields['description'] = _descriptionController.text.trim()
@@ -162,17 +137,14 @@ class _EmployeeSuggestionFormScreenState
         ),
         centerTitle: true,
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          // gradient: RadialGradient(
-          //   center: Alignment.center,
-          //   radius: 1.4,
-          //   colors: [Colors.blue.shade900, Colors.blue.shade400],
-          // ),
-        ),
+      body: RefreshIndicator(
+        onRefresh: _refreshSuggestions,
+        // child: Container(
+        //   width: double.infinity,
+        //   height: double.infinity,
+        //   decoration: BoxDecoration(),
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.all(20),
           child: Column(
             children: [
@@ -223,57 +195,15 @@ class _EmployeeSuggestionFormScreenState
                           SizedBox(height: 20),
 
                           // Title
-                          TextFormField(
-                            controller: _titleController,
-                            validator: (value) => value == null || value.isEmpty
-                                ? "Enter title"
-                                : null,
-                            style: TextStyle(color: Colors.black),
-                            decoration: _inputDecoration("Title", Icons.title),
-                          ),
+                          _titleField(),
                           SizedBox(height: 20),
 
                           // Description
-                          TextFormField(
-                            controller: _descriptionController,
-                            validator: (value) => value == null || value.isEmpty
-                                ? "Enter description"
-                                : null,
-                            style: TextStyle(color: Colors.black),
-                            maxLines: 4,
-                            decoration: _inputDecoration(
-                              "Description",
-                              Icons.description,
-                            ),
-                          ),
+                          _descrtiptionField(),
                           SizedBox(height: 20),
 
                           // Category Dropdown
-                          DropdownButtonFormField<String>(
-                            dropdownColor: Colors.white,
-                            style: TextStyle(color: Colors.black),
-                            decoration: _inputDecoration(
-                              "Category",
-                              Icons.category,
-                            ),
-                            value: _selectedCategory,
-                            items: categories
-                                .map(
-                                  (cat) => DropdownMenuItem(
-                                    value: cat,
-                                    child: Text(
-                                      cat,
-                                      style: TextStyle(color: Colors.black),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (val) {
-                              setState(() => _selectedCategory = val);
-                            },
-                            validator: (value) =>
-                                value == null ? "Select a category" : null,
-                          ),
+                          _categoryField(),
                           SizedBox(height: 20),
 
                           // Optional Image
@@ -299,39 +229,7 @@ class _EmployeeSuggestionFormScreenState
                           SizedBox(height: 30),
 
                           // Submit Button
-                          GestureDetector(
-                            onTap: _submitForm,
-                            child: Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.symmetric(vertical: 14),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.blue.shade800,
-                                    Colors.blue.shade600,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    offset: Offset(4, 4),
-                                    blurRadius: 6,
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "Submit Suggestion",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                          _submitButton(),
                         ],
                       ),
                     ),
@@ -339,32 +237,112 @@ class _EmployeeSuggestionFormScreenState
                 ),
               ),
               SizedBox(height: 20),
-              GestureDetector(
-                onTap: () => Get.toNamed("/my_suggestions"),
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.blue.shade700, width: 1.5),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "My Submitted Suggestions",
-                      style: TextStyle(
-                        color: Colors.blue.shade700,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              _suggestionsButton(),
             ],
           ),
         ),
       ),
+    );
+    // );
+  }
+
+  GestureDetector _suggestionsButton() {
+    return GestureDetector(
+      onTap: () => Get.toNamed("/my_suggestions"),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.blue.shade700, width: 1.5),
+        ),
+        child: Center(
+          child: Text(
+            "My Submitted Suggestions",
+            style: TextStyle(
+              color: Colors.blue.shade700,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  GestureDetector _submitButton() {
+    return GestureDetector(
+      onTap: _submitForm,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade800, Colors.blue.shade600],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              offset: Offset(4, 4),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            "Submit Suggestion",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DropdownButtonFormField<String> _categoryField() {
+    return DropdownButtonFormField<String>(
+      dropdownColor: Colors.white,
+      style: TextStyle(color: Colors.black),
+      decoration: _inputDecoration("Category", Icons.category),
+      value: _selectedCategory,
+      items: categories
+          .map(
+            (cat) => DropdownMenuItem(
+              value: cat,
+              child: Text(cat, style: TextStyle(color: Colors.black)),
+            ),
+          )
+          .toList(),
+      onChanged: (val) {
+        setState(() => _selectedCategory = val);
+      },
+      validator: (value) => value == null ? "Select a category" : null,
+    );
+  }
+
+  TextFormField _descrtiptionField() {
+    return TextFormField(
+      controller: _descriptionController,
+      validator: (value) =>
+          value == null || value.isEmpty ? "Enter description" : null,
+      style: TextStyle(color: Colors.black),
+      maxLines: 4,
+      decoration: _inputDecoration("Description", Icons.description),
+    );
+  }
+
+  TextFormField _titleField() {
+    return TextFormField(
+      controller: _titleController,
+      validator: (value) =>
+          value == null || value.isEmpty ? "Enter title" : null,
+      style: TextStyle(color: Colors.black),
+      decoration: _inputDecoration("Title", Icons.title),
     );
   }
 

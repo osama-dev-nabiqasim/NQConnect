@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
+import 'package:nqconnect/utils/api_constants.dart';
 
 import 'package:nqconnect/controllers/notification_controller.dart';
 
@@ -15,25 +16,7 @@ class ApiService {
   // final String baseUrl = 'http://10.0.2.2:5000/api';
 
   // ------------------ For physical device  -------------------------------------
-  final String baseUrl = 'http://10.10.5.172:5000/api';
-
-  // final String baseUrl = 'http://${await storage.read(key: 'server_ip') ?? '10.10.5.126'}:5000/api';
-
-  // Future<void> _initBaseUrl() async {
-  //   // Try to get user-saved IP from secure storage
-  //   final savedIP = await storage.read(key: 'server_ip');
-  //   if (savedIP != null) {
-  //     baseUrl = 'http://$savedIP:5000/api';
-  //   } else {
-  //     // Fallback to .env file
-  //     baseUrl = dotenv.env['BASE_URL'] ?? 'http://10.10.5.126:5000/api';
-  //   }
-  // }
-
-  // final String baseUrl =
-  //     dotenv.env['BASE_URL'] ?? 'http://10.10.5.126:5000/api';
-
-  // final String baseUrl = 'http://10.10.5.126:5000/api';
+  final String baseUrl = ApiConstants.baseUrl;
 
   // 👇 Add this method inside ApiService class
   static const storage = FlutterSecureStorage();
@@ -276,63 +259,6 @@ class ApiService {
       throw Exception('Network error: $e');
     }
   }
-
-  // PUT update suggestion status
-  // Future<void> updateSuggestionStatus(
-  //   String id,
-  //   Map<String, dynamic> data,
-  // ) async {
-  //   try {
-  //     final response = await http.put(
-  //       Uri.parse('$baseUrl/suggestions/$id/status'),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode(data),
-  //     );
-  //     if (response.statusCode != 200) {
-  //       throw Exception('Failed to update status');
-  //     }
-  //   } catch (e) {
-  //     throw Exception('Network error: $e');
-  //   }
-  // }
-
-  // // POST like/dislike
-  // Future<void> voteOnSuggestion(
-  //   String suggestionId,
-  //   String type,
-  //   String employeeId,
-  // ) async {
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse('$baseUrl/suggestions/$suggestionId/vote'),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode({'type': type, 'employee_id': employeeId}),
-  //     );
-  //     if (response.statusCode != 200) {
-  //       throw Exception('Failed to vote');
-  //     }
-  //   } catch (e) {
-  //     throw Exception('Network error: $e');
-  //   }
-  // }
-
-  // Future<String?> getUserVote(String suggestionId, String employeeId) async {
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse(
-  //         '$baseUrl/suggestions/$suggestionId/vote?employee_id=$employeeId',
-  //       ),
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body);
-  //       return data['data'];
-  //     } else {
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
 
   Future<Map<String, dynamic>> updateSuggestionStatus(
     String id,
