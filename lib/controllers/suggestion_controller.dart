@@ -1,9 +1,13 @@
 // ignore_for_file: unnecessary_cast, unnecessary_import, await_only_futures, unrelated_type_equality_checks, avoid_print
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:nqconnect/utils/api_constants.dart';
 import '../services/api_service.dart';
 import '../models/suggestion_model.dart';
 import '../models/status_history_model.dart';
@@ -298,22 +302,114 @@ class SuggestionController extends GetxController {
     }
   }
 
+  // Future<void> bulkArchive(List<String> suggestionIds, bool archive) async {
+  //   try {
+  //     isLoading.value = true;
+  //     for (var id in suggestionIds) {
+  //       final index = suggestions.indexWhere((s) => s.id.toString() == id);
+  //       if (index != -1) {
+  //         suggestions[index] = suggestions[index].copyWith(isArchived: archive);
+  //       }
+  //     }
+  //     suggestions.refresh();
+  //     _saveToLocal();
+  //   } catch (e) {
+  //     print(e);
+  //     Get.snackbar(
+  //       'Error',
+  //       'Failed to archive in bulk',
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
+
+  // Replace the existing bulkArchive method with this:
   Future<void> bulkArchive(List<String> suggestionIds, bool archive) async {
     try {
       isLoading.value = true;
-      for (var id in suggestionIds) {
-        final index = suggestions.indexWhere((s) => s.id.toString() == id);
-        if (index != -1) {
-          suggestions[index] = suggestions[index].copyWith(isArchived: archive);
+      String action = archive ? 'archive' : 'unarchive';
+      final List<String> idsToProcess = List.from(suggestionIds);
+
+      for (var id in idsToProcess) {
+        if (archive) {
+          await archiveSuggestionById(id); // Calls API & updates local state
+        } else {
+          await unarchiveSuggestionById(id); // Calls API & updates local state
         }
       }
-      suggestions.refresh();
-      _saveToLocal();
+
+      // Since the individual methods already called refresh, one final notification is enough
+      // Get.snackbar(
+      //   'Success',
+      //   'Bulk ${action} completed',
+      //   backgroundColor: Colors.green,
+      //   colorText: Colors.white,
+      // );
     } catch (e) {
-      print(e);
+      if (e.toString().contains('Concurrent modification')) {
+        print('Bulk Archive/Unarchive Error (Fixed): Handled iteration error');
+      } else {
+        print('Bulk Archive/Unarchive Error: $e');
+        Get.snackbar(
+          'Error',
+          'Failed to perform bulk action',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: Duration(seconds: 2),
+        );
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // void archiveSuggestion(String suggestionId, bool archive) {
+  //   final index = suggestions.indexWhere(
+  //     (s) => s.id.toString() == suggestionId,
+  //   );
+  //   if (index != -1) {
+  //     suggestions[index] = suggestions[index].copyWith(isArchived: archive);
+  //     suggestions.refresh();
+  //     _saveToLocal();
+  //   }
+  // }
+
+  // Inside SuggestionController class
+
+  // Function to archive a single suggestion
+  Future<void> archiveSuggestionById(String suggestionId) async {
+    try {
+      isLoading.value = true;
+
+      // 1. Call the API to update the database
+      await _apiService.archiveSuggestion(suggestionId);
+
+      // 2. Update the local list
+      final index = suggestions.indexWhere(
+        (s) => s.id.toString() == suggestionId,
+      );
+      if (index != -1) {
+        // Create a copy with the updated archive status
+        suggestions[index] = suggestions[index].copyWith(isArchived: true);
+        suggestions.refresh(); // Tell GetX to refresh UI
+        _saveToLocal();
+      }
+
+      // Get.snackbar(
+      //   'Success',
+      //   'Suggestion archived successfully',
+      //   backgroundColor: Colors.green,
+      //   colorText: Colors.white,
+      //   duration: Duration(seconds: 2),
+      // );
+    } catch (e) {
+      print('Archive Error: $e');
       Get.snackbar(
         'Error',
-        'Failed to archive in bulk',
+        'Failed to archive suggestion',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -322,14 +418,41 @@ class SuggestionController extends GetxController {
     }
   }
 
-  void archiveSuggestion(String suggestionId, bool archive) {
-    final index = suggestions.indexWhere(
-      (s) => s.id.toString() == suggestionId,
-    );
-    if (index != -1) {
-      suggestions[index] = suggestions[index].copyWith(isArchived: archive);
-      suggestions.refresh();
-      _saveToLocal();
+  // Function to unarchive a single suggestion
+  Future<void> unarchiveSuggestionById(String suggestionId) async {
+    try {
+      isLoading.value = true;
+
+      // 1. Call the API to update the database
+      await _apiService.unarchiveSuggestion(suggestionId);
+
+      // 2. Update the local list
+      final index = suggestions.indexWhere(
+        (s) => s.id.toString() == suggestionId,
+      );
+      if (index != -1) {
+        // Create a copy with the updated archive status
+        suggestions[index] = suggestions[index].copyWith(isArchived: false);
+        suggestions.refresh(); // Tell GetX to refresh UI
+        _saveToLocal();
+      }
+
+      // Get.snackbar(
+      //   'Success',
+      //   'Suggestion unarchived successfully',
+      //   backgroundColor: Colors.green,
+      //   colorText: Colors.white,
+      // );
+    } catch (e) {
+      print('Unarchive Error: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to unarchive suggestion',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -395,5 +518,42 @@ class SuggestionController extends GetxController {
     }
     if (deptVotes.isEmpty) return "N/A";
     return deptVotes.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+  }
+
+  Future<void> updateCategory(String id, String category) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/suggestions/$id');
+    final response = await http.patch(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'category': category}),
+    );
+    print(
+      'PATCH $uri body=${jsonEncode({'category': category})} '
+      'status=${response.statusCode} body=${response.body}',
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update category');
+    }
+  }
+
+  Future<void> startWorking(String id) async {
+    await updatePosition(id, 'OnProcess');
+  }
+
+  Future<void> markImplemented(String id) async {
+    await updatePosition(id, 'Implemented');
+  }
+
+  Future<void> updatePosition(String id, String position) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/suggestions/$id/position');
+    final resp = await http.put(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'position': position}),
+    );
+    if (resp.statusCode != 200) {
+      throw Exception('Failed to update position');
+    }
+    await fetchSuggestions(); // refresh list
   }
 }

@@ -374,6 +374,35 @@ class ApiService {
     }
   }
 
+  // Inside ApiService class
+
+  // Method to call the backend /archive endpoint
+  Future<void> archiveSuggestion(String id) async {
+    final url = Uri.parse('${ApiConstants.baseUrl}/suggestions/$id/archive');
+    final response = await http.patch(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      // PATCH request typically doesn't need a body here, but you can send an empty one if necessary
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to archive suggestion: ${response.body}');
+    }
+  }
+
+  // Method to call the backend /unarchive endpoint
+  Future<void> unarchiveSuggestion(String id) async {
+    final url = Uri.parse('${ApiConstants.baseUrl}/suggestions/$id/unarchive');
+    final response = await http.patch(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to unarchive suggestion: ${response.body}');
+    }
+  }
+
   // BULK delete suggestions
   Future<void> bulkDeleteSuggestions(List<String> ids) async {
     try {

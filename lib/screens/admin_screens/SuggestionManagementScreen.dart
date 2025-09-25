@@ -1,6 +1,7 @@
-// ignore_for_file: sort_child_properties_last, await_only_futures
+// ignore_for_file: sort_child_properties_last, await_only_futures, prefer_const_constructors_in_immutables
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:nqconnect/controllers/suggestion_management_controller.dart';
 import 'package:nqconnect/models/suggestion_model.dart';
 import 'package:nqconnect/utils/responsive.dart';
@@ -114,12 +115,19 @@ class _SuggestionManagementScreenState extends State<SuggestionManagementScreen>
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            Row(
-              children: [
-                _buildFilterChip('Active', 'active'),
-                const SizedBox(width: 8),
-                _buildFilterChip('Archived', 'archived'),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip('Active', 'active'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Archived', 'archived'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('On Process', 'on_process'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Done', 'done'), // ✅ new tab
+                ],
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -370,8 +378,9 @@ class _SuggestionManagementScreenState extends State<SuggestionManagementScreen>
                 'Category: ${suggestion.category} • ${suggestion.likes} 👍',
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
+
               Text(
-                'Created: ${suggestion.createdAt.toString().split(' ')[0]}',
+                "Created: ${DateFormat('dd MMM yyyy').format(suggestion.createdAt.toLocal())}",
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
@@ -385,6 +394,17 @@ class _SuggestionManagementScreenState extends State<SuggestionManagementScreen>
                       value: 'view',
                       child: Text('View Details'),
                     ),
+                    if (suggestion.status == 'Approved' &&
+                        suggestion.position == null)
+                      const PopupMenuItem(
+                        value: 'start_working',
+                        child: Text('Start Working'),
+                      ),
+                    if (suggestion.position == 'OnProcess')
+                      const PopupMenuItem(
+                        value: 'mark_implemented',
+                        child: Text('Mark Implemented'),
+                      ),
                     PopupMenuItem(
                       value: 'approve',
                       child: Text(
@@ -479,15 +499,42 @@ class _SuggestionManagementScreenState extends State<SuggestionManagementScreen>
             });
         break;
       case 'archive':
-        controller.suggestionController.archiveSuggestion(
+        if (suggestion.isArchived) {
+          controller.suggestionController.unarchiveSuggestionById(
+            suggestion.id.toString(),
+          );
+        } else {
+          controller.suggestionController.archiveSuggestionById(
+            suggestion.id.toString(),
+          );
+        }
+        break;
+      case 'start_working':
+        controller.suggestionController.startWorking(suggestion.id.toString());
+        Get.snackbar(
+          'Started',
+          'Marked as On Process',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+        break;
+      case 'mark_implemented':
+        controller.suggestionController.markImplemented(
           suggestion.id.toString(),
-          !suggestion.isArchived,
+        );
+        Get.snackbar(
+          'Implemented',
+          'Marked as Implemented',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
         );
         break;
     }
   }
 
   void _showSuggestionDetails(Suggestion suggestion) {
+    final controller = Get.find<SuggestionManagementController>();
+    final RxString selectedCategory = suggestion.category.obs;
     Get.dialog(
       AlertDialog(
         title: Text(suggestion.title),
@@ -500,6 +547,22 @@ class _SuggestionManagementScreenState extends State<SuggestionManagementScreen>
               children: [
                 Text(suggestion.description),
                 const SizedBox(height: 16),
+                Obx(
+                  () => DropdownButton<String>(
+                    value: selectedCategory.value,
+
+                    isExpanded: true,
+                    items: ['Process', 'Workplace', 'Team', 'Other']
+                        // controller.availableCategories
+                        //     .where((c) => c != 'all') // hide the fake "all"
+                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .toList(),
+                    onChanged: (val) {
+                      if (val != null) selectedCategory.value = val;
+                    },
+                  ),
+                ),
+                SizedBox(height: 16),
                 Text('Employee name: ${suggestion.employeeName}'),
                 Text('Employee ID: ${suggestion.employeeId}'),
 
@@ -541,6 +604,23 @@ class _SuggestionManagementScreenState extends State<SuggestionManagementScreen>
           ),
         ),
         actions: [
+          TextButton(
+            child: const Text('Update Category'),
+            onPressed: () async {
+              await controller.updateCategory(
+                suggestion.id.toString(),
+                selectedCategory.value,
+              );
+
+              Get.back();
+              Get.snackbar(
+                'Category Updated',
+                'Category changed to $selectedCategory',
+                backgroundColor: Colors.green,
+                colorText: Colors.white,
+              );
+            },
+          ),
           TextButton(onPressed: () => Get.back(), child: const Text('Close')),
         ],
       ),

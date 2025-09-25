@@ -19,6 +19,7 @@ class Suggestion {
   String? image;
   List<StatusHistory> statusHistory;
   String? userVote;
+  String? position;
 
   Suggestion({
     required this.id,
@@ -39,6 +40,7 @@ class Suggestion {
     this.image,
     this.userVote,
     this.statusHistory = const [],
+    this.position,
   });
 
   factory Suggestion.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,7 @@ class Suggestion {
       isArchived: json['is_archived'] ?? false,
       image: json['image'],
       userVote: json['userVote'],
+      position: json['position'] as String?,
       statusHistory: (json['statusHistory'] as List? ?? [])
           .map((e) => StatusHistory.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -90,6 +93,7 @@ class Suggestion {
       'review_comments': reviewComments,
       'is_archived': isArchived,
       'image': image,
+      'position': position,
       'statusHistory': statusHistory.map((e) => e.toMap()).toList(),
     };
   }
@@ -114,6 +118,7 @@ class Suggestion {
     String? image,
     List<StatusHistory>? statusHistory,
     String? userVote,
+    String? position,
   }) {
     return Suggestion(
       id: id ?? this.id,
@@ -134,6 +139,7 @@ class Suggestion {
       image: image ?? this.image,
       statusHistory: statusHistory ?? this.statusHistory,
       userVote: userVote ?? this.userVote,
+      position: position ?? this.position,
     );
   }
 }
