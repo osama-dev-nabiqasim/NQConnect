@@ -15,7 +15,7 @@ class AnalyticsDashboard extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "System Analytics",
+          "Suggestion Analytics",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: AppColors.appbarColor[0],
