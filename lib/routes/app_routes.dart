@@ -11,6 +11,10 @@ import 'package:nqconnect/screens/auth_screens/login_screen.dart';
 import 'package:nqconnect/screens/dashboard/notifications_page.dart';
 import 'package:nqconnect/screens/employee_screens/suggestion_screens/MySuggestionsScreen.dart';
 import 'package:nqconnect/screens/employee_screens/suggestion_screens/VoteOnSuggestion_Screen.dart';
+import 'package:nqconnect/screens/events_screens/admin/event_creation_screen.dart';
+import 'package:nqconnect/screens/events_screens/admin/event_management_screen.dart';
+import 'package:nqconnect/screens/events_screens/event_detail_screen.dart';
+import 'package:nqconnect/screens/events_screens/event_list_screen.dart';
 import 'package:nqconnect/screens/manager_screens/suggestions_screens/ApproveRejectScreen.dart';
 import 'package:nqconnect/screens/manager_screens/suggestions_screens/SuggestionInsights_Screen.dart';
 import 'package:nqconnect/screens/manager_screens/suggestions_screens/manager_vote_screen.dart';
@@ -97,5 +101,11 @@ class AppRoutes {
       name: '/configurations',
       page: () => PlaceholderScreen(title: "Sections & Configurations"),
     ),
+
+    // ----------------------------Event Screens Routes----------------------------
+    // GetPage(name: '/events', page: () => EventListScreen()),
+    // GetPage(name: '/event_detail', page: () => EventDetailScreen()),
+    // GetPage(name: '/event_create', page: () => EventCreationScreen(token: widget.token)),
+    // GetPage(name: '/event_management', page: () => EventManagementScreen()),
   ];
 }

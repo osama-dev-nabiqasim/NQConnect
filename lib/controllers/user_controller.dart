@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 
 import 'package:get/get.dart';
@@ -17,15 +19,16 @@ class UserController extends GetxController {
     String? name,
     String? userRole,
     String? dept,
-    String? userEmail,
-  ) {
+    String? userEmail, {
+    String? jwtToken,
+  }) {
     employeeId.value = id ?? ''; // 👈 Save kar raha hai
     userName.value = name ?? '';
     role.value = userRole ?? '';
     department.value = dept ?? '';
     email.value = userEmail ?? '';
-
-    _saveToPrefs(id, name, userRole, dept, userEmail);
+    token.value = jwtToken ?? '';
+    _saveToPrefs(id, name, userRole, dept, userEmail, jwtToken);
   }
 
   // 👇 Load from local storage (optional — for auto-login)
@@ -68,6 +71,7 @@ class UserController extends GetxController {
     String? role,
     String? dept,
     String? email,
+    String? jwtToken,
   ) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
@@ -78,6 +82,7 @@ class UserController extends GetxController {
         'role': role,
         'department': dept,
         'email': email,
+        'token': jwtToken,
       }),
     );
   }

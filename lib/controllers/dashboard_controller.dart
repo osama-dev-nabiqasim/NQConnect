@@ -9,9 +9,9 @@ class DashboardController extends GetxController {
 
   List<Section> employeeSections = [
     Section(
-      name: "Quick Stats / Overview",
-      icon: Icons.dashboard,
-      route: "/employee_overview",
+      name: "Upcoming Events",
+      icon: Icons.event_available,
+      route: "/events",
       fullWidth: true,
     ),
     Section(name: "My Tasks", icon: Icons.task, route: "/tasks"),
@@ -32,9 +32,9 @@ class DashboardController extends GetxController {
 
   List<Section> managerSections = [
     Section(
-      name: "Team Performance Overview",
-      icon: Icons.bar_chart,
-      route: "/team_overview",
+      name: "Upcoming Events",
+      icon: Icons.event,
+      route: "/events",
       fullWidth: true,
     ),
     Section(
@@ -67,27 +67,24 @@ class DashboardController extends GetxController {
   // ----------------------------------Admin Section--------------------------------------------------------
   List<Section> adminSections = [
     Section(
-      name: "Suggestions Overview / Analytics",
-      icon: Icons.analytics,
-      route: "/suggestion_overview",
+      name: "Events Overview",
+      icon: Icons.event_note,
+      route: "/events", // list + respond
       fullWidth: true,
     ),
-    Section(name: "Task Overview", icon: Icons.task, route: "/task_overview"),
+    Section(name: "Create Event", icon: Icons.add_box, route: "/event_create"),
+    Section(
+      name: "Manage Events",
+      icon: Icons.manage_search,
+      route: "/event_management",
+    ),
+
     Section(
       name: "Suggestion Management",
       icon: Icons.manage_accounts,
       route: "/suggestion_management",
     ),
-    Section(
-      name: "Innovation Analytics",
-      icon: Icons.trending_up,
-      route: "/innovation_analytics",
-    ),
-    Section(
-      name: "Sections & Configurations",
-      icon: Icons.settings,
-      route: "/configurations",
-    ),
+
     Section(
       name: "Notifications",
       icon: Icons.notifications,
