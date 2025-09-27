@@ -1,7 +1,9 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:nqconnect/controllers/user_controller.dart';
 import 'package:nqconnect/models/event_models/event.dart';
 import 'package:nqconnect/models/event_models/event_stats.dart';
 import 'package:nqconnect/utils/api_constants.dart';
@@ -11,16 +13,16 @@ import 'package:nqconnect/utils/api_constants.dart';
 class EventApiService {
   /// Change to your actual backend base URL if needed.
   // static const String _baseUrl = "$ApiConstants.bas";
-  final String _baseUrl = ApiConstants.baseUrl;
-
-  // On real device in same LAN, replace 10.0.2.2 with your PC IP.
-
-  final String token; // pass logged-in user's JWT token
-  EventApiService({required this.token});
+  final String _baseUrl = ApiConstants.eventbaseUrl;
+  // 🔑 Get the logged-in user's token from UserController
+  String get _token {
+    final userController = Get.find<UserController>();
+    return userController.token.value;
+  }
 
   Map<String, String> get _headers => {
     "Content-Type": "application/json",
-    "Authorization": "Bearer $token",
+    "Authorization": "Bearer $_token",
   };
 
   /// GET /api/events
@@ -142,6 +144,83 @@ class EventApiService {
       return stats;
     } else {
       throw Exception("❌ Failed to fetch stats: ${res.body}");
+    }
+  }
+
+  // Future<int> fetchUserRsvpStatus(String eventId) async {
+  //   // 💡 Base URL ko API URL ke saath jodein
+  //   final url =
+  //       "$_baseUrl/$eventId/my-rsvp"; // Example: your_base_url/123/my-rsvp
+  //   print("➡️ Fetching user RSVP status from $url");
+
+  //   final res = await http.get(Uri.parse(url), headers: _headers);
+  //   print("⬅️ Response [${res.statusCode}]: ${res.body}");
+
+  //   if (res.statusCode == 200) {
+  //     final data = jsonDecode(res.body);
+  //     // ✅ Assume API returns: {"responseType": 1}
+  //     return data['responseType'] as int;
+  //   }
+  //   // Agar API response code 404/204 de ya koi khaas code de jab response na ho
+  //   else if (res.statusCode == 404 || res.statusCode == 204) {
+  //     print("✅ No existing RSVP found for event $eventId.");
+  //     return 0; // 0 means No Response
+  //   } else {
+  //     throw Exception('❌ Failed to load user RSVP: ${res.body}');
+  //   }
+  // }
+
+  Future<int> fetchUserRsvpStatus(String eventId) async {
+    // 💡 FIX 1: Correct URL structure. _baseUrl already contains the base path.
+    // Example URL: http://10.10.5.188:5000/api/events/2/my-rsvp
+    final url = "$_baseUrl/$eventId/my-response";
+    print("➡️  Fetching user RSVP status from $url");
+
+    // 💡 FIX 2: Headers (including Authorization token) pass karein
+    final res = await http.get(
+      Uri.parse(url),
+      headers: _headers, // <--- 🚀 Yeh zaroori hai
+    );
+    print("⬅️  Response [${res.statusCode}]: ${res.body}");
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      final responseValue = data['responseType'];
+      if (responseValue is String) {
+        // Agar value String hai (e.g., "1"), toh usko parse karein
+        return int.tryParse(responseValue) ?? 0;
+      } else if (responseValue is int) {
+        // Agar value already int hai, toh use return karein
+        return responseValue;
+      }
+      return 0;
+    }
+    // Agar server kahay 'Not Found' (404) ya 'No Content' (204), toh 0 return karein.
+    else if (res.statusCode == 404 || res.statusCode == 204) {
+      print("✅ No existing RSVP found (Status: ${res.statusCode}).");
+      return 0; // 0 means No Response
+    } else {
+      // Baaki errors ke liye exception throw karein.
+      throw Exception(
+        '❌ Failed to load user RSVP (Code ${res.statusCode}): ${res.body}',
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchAnalytics() async {
+    final url = Uri.parse('$_baseUrl/analytics');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $_token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load analytics: ${response.body}');
     }
   }
 }

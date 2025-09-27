@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nqconnect/models/event_models/event.dart';
 import 'package:nqconnect/services/event_api_service.dart';
-import 'package:nqconnect/screens/events_screens/admin/event_creation_screen.dart';
 import 'package:nqconnect/screens/events_screens/event_detail_screen.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 /// Admin/HR screen: view list of events and create new ones.
 class EventManagementScreen extends StatefulWidget {
@@ -17,6 +17,7 @@ class EventManagementScreen extends StatefulWidget {
 
 class _EventManagementScreenState extends State<EventManagementScreen> {
   late Future<List<Event>> _futureEvents;
+  late EventApiService eventApi;
 
   @override
   void initState() {
@@ -25,24 +26,24 @@ class _EventManagementScreenState extends State<EventManagementScreen> {
   }
 
   void _loadEvents() {
-    _futureEvents = EventApiService(token: widget.token).fetchEvents();
+    _futureEvents = EventApiService().fetchEvents();
   }
 
   Future<void> _refresh() async {
     setState(() => _loadEvents());
   }
 
-  Future<void> _openCreation() async {
-    final created = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EventCreationScreen(token: widget.token),
-      ),
-    );
-    if (created == true) {
-      _refresh();
-    }
-  }
+  // Future<void> _openCreation() async {
+  //   final created = await Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (_) => EventCreationScreen(token: widget.token),
+  //     ),
+  //   );
+  //   if (created == true) {
+  //     _refresh();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -50,13 +51,14 @@ class _EventManagementScreenState extends State<EventManagementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Event Management"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _openCreation,
-            tooltip: "Create Event",
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.add),
+        //     onPressed: _openCreation,
+        //     tooltip: "Create Event",
+        //   ),
+        // ],
+        backgroundColor: AppColors.appbarColor.first,
       ),
       body: RefreshIndicator(
         onRefresh: _refresh,

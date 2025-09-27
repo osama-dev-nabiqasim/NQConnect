@@ -5,4 +5,6 @@ class ApiConstants {
 
   // ------------------ For image  -------------------------------------
   static const String imagebaseUrl = 'http://10.10.5.188:5000';
+
+  static const String eventbaseUrl = 'http://10.10.5.188:5000/api/events';
 }

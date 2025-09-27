@@ -73,11 +73,13 @@ class _LoginScreenState extends State<LoginScreen> {
           user['role'] ?? '',
           user['department'] ?? '',
           user['email'] ?? '',
+          jwtToken: token,
         );
 
         print(
-          '✅ AFTER LOGIN - EMPLOYEE ID: ${userController.employeeId.value}',
+          '✅ AFTER LOGIN - EMPLOYEE ID: ${userController.employeeId.value}, ${userController.token.value}',
         );
+
         Get.snackbar(
           "Login Successful",
           "Welcome, ${user['name']} (${user['department']})",

@@ -1,6 +1,7 @@
 // lib/routes/app_routes.dart
 import 'package:get/get.dart';
 import 'package:nqconnect/controllers/user_controller.dart';
+import 'package:nqconnect/models/event_models/event.dart';
 import 'package:nqconnect/screens/admin_screens/AnalyticsScreen.dart';
 import 'package:nqconnect/screens/admin_screens/SuggestionManagementScreen.dart';
 import 'package:nqconnect/screens/auth_screens/reset_password_screens/EnterOtpScreen.dart';
@@ -11,6 +12,7 @@ import 'package:nqconnect/screens/auth_screens/login_screen.dart';
 import 'package:nqconnect/screens/dashboard/notifications_page.dart';
 import 'package:nqconnect/screens/employee_screens/suggestion_screens/MySuggestionsScreen.dart';
 import 'package:nqconnect/screens/employee_screens/suggestion_screens/VoteOnSuggestion_Screen.dart';
+import 'package:nqconnect/screens/events_screens/admin/EventAnalyticsDashboard.dart';
 import 'package:nqconnect/screens/events_screens/admin/event_creation_screen.dart';
 import 'package:nqconnect/screens/events_screens/admin/event_management_screen.dart';
 import 'package:nqconnect/screens/events_screens/event_detail_screen.dart';
@@ -85,6 +87,7 @@ class AppRoutes {
 
     // ----------------------------Admin Routes----------------------------
     GetPage(name: '/suggestion_overview', page: () => AnalyticsDashboard()),
+
     GetPage(
       name: '/task_overview',
       page: () => PlaceholderScreen(title: "Task Overview"),
@@ -103,9 +106,34 @@ class AppRoutes {
     ),
 
     // ----------------------------Event Screens Routes----------------------------
-    // GetPage(name: '/events', page: () => EventListScreen()),
-    // GetPage(name: '/event_detail', page: () => EventDetailScreen()),
-    // GetPage(name: '/event_create', page: () => EventCreationScreen(token: widget.token)),
-    // GetPage(name: '/event_management', page: () => EventManagementScreen()),
+    GetPage(
+      name: '/events',
+      page: () => EventListScreen(token: Get.parameters['token'] ?? ''),
+    ),
+    GetPage(name: '/eventanalytics', page: () => EventAnalyticsDashboard()),
+    // GetPage(
+    //   name: '/event_detail',
+    //   page: () => EventDetailScreen(token: Get.parameters['token'] ?? ''),
+    // ),
+    GetPage(
+      name: '/event_detail',
+      page: () {
+        final userController = Get.find<UserController>();
+        final args = Get.arguments as Map<String, dynamic>;
+        final event = args['event'] as Event;
+        return EventDetailScreen(
+          token: userController.token.value,
+          event: event,
+        );
+      },
+    ),
+    GetPage(
+      name: '/event_create',
+      page: () => EventCreationScreen(token: Get.parameters['token'] ?? ''),
+    ),
+    GetPage(
+      name: '/event_management',
+      page: () => EventManagementScreen(token: Get.parameters['token'] ?? ''),
+    ),
   ];
 }

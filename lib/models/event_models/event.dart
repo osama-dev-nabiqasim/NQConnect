@@ -37,50 +37,89 @@ class Event {
   });
 
   /// Factory constructor to create Event object from backend JSON.
+  // factory Event.fromJson(Map<String, dynamic> json) {
+  //   return Event(
+  //     eventId: json['EventID'] ?? json['eventId'] ?? 0,
+  //     title: json['Title'] ?? '',
+  //     description: json['Description'] ?? '',
+  //     startDate: DateTime.parse(json['StartDate']),
+  //     endDate: DateTime.parse(json['EndDate']),
+  //     rsvpDeadline: json['RSVPDeadline'] != null
+  //         ? DateTime.tryParse(json['RSVPDeadline'])
+  //         : null,
+  //     location: json['Location'] ?? '',
+  //     category: json['Category'] ?? '',
+  //     maxCapacity: json['MaxCapacity'],
+  //     coverImageUrl: json['CoverImageURL'],
+  //     attachmentsJson: json['AttachmentsJSON'],
+  //     organizerUserId: json['OrganizerUserID'] ?? 0,
+  //     isActive: (json['IsActive'] ?? 1) == 1,
+  //     createdAt: DateTime.parse(json['CreatedAt']),
+  //     updatedAt: json['UpdatedAt'] != null
+  //         ? DateTime.tryParse(json['UpdatedAt'])
+  //         : null,
+  //   );
+  // }
+
+  // factory Event.fromJson(Map<String, dynamic> json) {
+  //   return Event(
+  //     eventId: json['eventId'] ?? json['eventId'] ?? 0,
+  //     title: json['title'] ?? '',
+  //     description: json['description'] ?? '',
+  //     startDate: DateTime.tryParse(json['startDate'] ?? '') ?? DateTime.now(),
+  //     endDate: DateTime.tryParse(json['endDate'] ?? '') ?? DateTime.now(),
+  //     rsvpDeadline: DateTime.tryParse(json['rsvpDeadline'] ?? ''),
+  //     location: json['location'] ?? '',
+  //     category: json['category'] ?? '',
+  //     maxCapacity: json['maxCapacity'],
+  //     coverImageUrl: json['coverImageURL'],
+  //     attachmentsJson: json['attachmentsJSON'],
+  //     organizerUserId: json['createdBy'] ?? 0,
+  //     isActive: (json['IsActive'] ?? 1) == 1,
+  //     createdAt: DateTime.tryParse(json['CreatedAt'] ?? '') ?? DateTime.now(),
+  //     updatedAt: DateTime.tryParse(json['UpdatedAt'] ?? ''),
+  //   );
+  // }
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
-      eventId: json['EventID'] ?? json['eventId'] ?? 0,
+      eventId: json['EventID'] ?? 0,
       title: json['Title'] ?? '',
       description: json['Description'] ?? '',
       startDate: DateTime.parse(json['StartDate']),
       endDate: DateTime.parse(json['EndDate']),
-      rsvpDeadline: json['RSVPDeadline'] != null
-          ? DateTime.tryParse(json['RSVPDeadline'])
-          : null,
+      rsvpDeadline: DateTime.parse(json['RSVPDeadline']),
       location: json['Location'] ?? '',
       category: json['Category'] ?? '',
-      maxCapacity: json['MaxCapacity'],
-      coverImageUrl: json['CoverImageURL'],
-      attachmentsJson: json['AttachmentsJSON'],
+      maxCapacity: json['MaxCapacity'] ?? 0,
+      coverImageUrl: json['CoverImageURL'] ?? '',
+      attachmentsJson: json['AttachmentsJSON'] ?? '',
       organizerUserId: json['OrganizerUserID'] ?? 0,
-      isActive: (json['IsActive'] ?? 1) == 1,
+      isActive: json['IsActive'] ?? true,
       createdAt: DateTime.parse(json['CreatedAt']),
       updatedAt: json['UpdatedAt'] != null
-          ? DateTime.tryParse(json['UpdatedAt'])
+          ? DateTime.parse(json['UpdatedAt'])
           : null,
     );
   }
 
   /// Convert Event object back to JSON (for creating/updating events).
-  Map<String, dynamic> toJson() {
-    return {
-      'EventID': eventId,
-      'Title': title,
-      'Description': description,
-      'StartDate': startDate.toIso8601String(),
-      'EndDate': endDate.toIso8601String(),
-      'RSVPDeadline': rsvpDeadline?.toIso8601String(),
-      'Location': location,
-      'Category': category,
-      'MaxCapacity': maxCapacity,
-      'CoverImageURL': coverImageUrl,
-      'AttachmentsJSON': attachmentsJson,
-      'OrganizerUserID': organizerUserId,
-      'IsActive': isActive ? 1 : 0,
-      'CreatedAt': createdAt.toIso8601String(),
-      'UpdatedAt': updatedAt?.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    "eventId": eventId,
+    "title": title,
+    "description": description,
+    "startDate": startDate.toUtc().toIso8601String(),
+    "endDate": endDate.toUtc().toIso8601String(),
+    "rsvpDeadline": rsvpDeadline!.toUtc().toIso8601String(),
+    "location": location,
+    "category": category,
+    "maxCapacity": maxCapacity,
+    "coverImageURL": coverImageUrl,
+    "attachmentsJSON": attachmentsJson,
+    "createdBy": organizerUserId,
+    "IsActive": isActive ? 1 : 0,
+    "CreatedAt": createdAt.toUtc().toIso8601String(),
+    "UpdatedAt": updatedAt?.toUtc().toIso8601String(),
+  };
 
   /// Handy method if backend sends a JSON array
   static List<Event> listFromJson(String source) {

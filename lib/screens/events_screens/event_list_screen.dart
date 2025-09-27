@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:nqconnect/models/event_models/event.dart';
 import 'package:nqconnect/services/event_api_service.dart';
 import 'package:nqconnect/screens/events_screens/event_detail_screen.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 /// Screen for employees and admins to view upcoming events
 /// and tap to see detail / respond.
@@ -20,12 +21,12 @@ class _EventListScreenState extends State<EventListScreen> {
   @override
   void initState() {
     super.initState();
-    _futureEvents = EventApiService(token: widget.token).fetchEvents();
+    _futureEvents = EventApiService().fetchEvents(); // ✅
   }
 
   Future<void> _refresh() async {
     setState(() {
-      _futureEvents = EventApiService(token: widget.token).fetchEvents();
+      _futureEvents = EventApiService().fetchEvents();
     });
   }
 
@@ -33,7 +34,10 @@ class _EventListScreenState extends State<EventListScreen> {
   Widget build(BuildContext context) {
     final df = DateFormat('dd MMM yyyy');
     return Scaffold(
-      appBar: AppBar(title: const Text("Upcoming Events")),
+      appBar: AppBar(
+        title: const Text("Upcoming Events"),
+        backgroundColor: AppColors.appbarColor.first,
+      ),
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: FutureBuilder<List<Event>>(

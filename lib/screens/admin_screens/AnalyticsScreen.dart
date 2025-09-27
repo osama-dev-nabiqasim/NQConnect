@@ -143,45 +143,6 @@ class AnalyticsDashboard extends StatelessWidget {
     );
   }
 
-  // Widget _buildMetricCard(
-  //   BuildContext context,
-  //   String title,
-  //   String value,
-  //   IconData icon,
-  //   Color color,
-  // ) {
-  //   return Card(
-  //     elevation: 3,
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(12),
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  //           Icon(icon, size: 30, color: color),
-  //           const SizedBox(height: 8),
-  //           Text(
-  //             value,
-  //             style: TextStyle(
-  //               fontSize: Responsive.font(context, 18),
-  //               fontWeight: FontWeight.bold,
-  //               color: Colors.black87,
-  //             ),
-  //           ),
-  //           const SizedBox(height: 4),
-  //           Text(
-  //             title,
-  //             style: TextStyle(
-  //               fontSize: Responsive.font(context, 12),
-  //               color: Colors.grey[600],
-  //             ),
-  //             textAlign: TextAlign.center,
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildMetricCard(
     BuildContext context,
     String title,

@@ -1,7 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nqconnect/models/event_models/event.dart';
 import 'package:nqconnect/services/event_api_service.dart';
+import 'package:nqconnect/utils/responsive.dart';
 
 /// Screen for HR/Admin to create a new event
 class EventCreationScreen extends StatefulWidget {
@@ -75,29 +78,48 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     setState(() => _loading = true);
 
     try {
-      final service = EventApiService(token: widget.token);
-      final event = Event(
+      final service = EventApiService();
+      // final event = Event(
+      //   eventId: 0,
+      //   title: _titleCtrl.text.trim(),
+      //   description: _descCtrl.text.trim(),
+      //   startDate: _startDate!,
+      //   endDate: _endDate!,
+      //   rsvpDeadline: _rsvpDeadline!,
+      //   location: _locationCtrl.text.trim(),
+      //   category: _categoryCtrl.text.trim(),
+      //   maxCapacity: int.tryParse(_capacityCtrl.text.trim()) ?? 0,
+      //   coverImageUrl: "",
+      //   attachmentsJson: "",
+      //   organizerUserId: 0,
+      //   isActive: true,
+      //   createdAt: DateTime.now(),
+      // );
+      final newEvent = Event(
         eventId: 0,
         title: _titleCtrl.text.trim(),
         description: _descCtrl.text.trim(),
-        startDate: _startDate!,
-        endDate: _endDate!,
-        rsvpDeadline: _rsvpDeadline!,
+        startDate: _startDate!.toUtc(), // keep UTC
+        endDate: _endDate!.toUtc(),
+        rsvpDeadline: _rsvpDeadline!.toUtc(),
         location: _locationCtrl.text.trim(),
         category: _categoryCtrl.text.trim(),
         maxCapacity: int.tryParse(_capacityCtrl.text.trim()) ?? 0,
-        coverImageUrl: "",
-        attachmentsJson: "",
-        organizerUserId: 0,
+        coverImageUrl: "", // optional
+        attachmentsJson: "", // optional
+        organizerUserId: 0, // backend can set actual userId if needed
         isActive: true,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       );
+      // await EventApiService.createEvent(payload);
+      print('➡️ Sending: ${newEvent.toJson()}');
 
-      final created = await service.createEvent(event);
+      final created = await service.createEvent(newEvent);
+      // final created = await service.createEvent(event);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("✅ Event created ID: ${created.eventId}")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("✅ Event created ID")));
       Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -110,9 +132,12 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final df = DateFormat('yyyy-MM-dd');
+    final df = DateFormat('yyyy-MM-dd HH:mm');
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Event")),
+      appBar: AppBar(
+        title: const Text("Create Event"),
+        backgroundColor: AppColors.appbarColor.first,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(

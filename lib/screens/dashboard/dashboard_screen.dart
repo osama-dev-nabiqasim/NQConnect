@@ -45,7 +45,7 @@ class DashboardScreen extends StatelessWidget {
 
     final isCircle = section.name == "Tasks" || section.name == "Suggestions";
     final isWide = section.name == "Logout" || section.name == "Overview";
-
+    final isFullWidth = section.fullWidth;
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0.0, end: 1.0),
       duration: Duration(milliseconds: 400 + (index * 100)),
@@ -76,7 +76,8 @@ class DashboardScreen extends StatelessWidget {
               splashColor: Colors.white24,
               borderRadius: BorderRadius.circular(isCircle ? 100 : 20),
               child: Container(
-                width: isWide ? double.infinity : null,
+                width: isFullWidth ? double.infinity : null,
+                // width: isWide ? double.infinity : null,
                 height: isCircle ? 100 : null,
                 padding: EdgeInsets.all(Responsive.width(context) * 0.05),
                 decoration: BoxDecoration(
@@ -135,40 +136,125 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRoleBasedLayout(BuildContext context, String role) {
-    final sections = controller.getSections(role);
+  // Widget _buildRoleBasedLayout(
+  //   BuildContext context,
+  //   String role,
+  //   String department,
+  // ) {
+  //   final sections = controller.getSections(role, department);
 
-    List<Widget> children = [];
+  //   List<Widget> children = [];
+  //   for (int i = 0; i < sections.length; i++) {
+  //     final sec = sections[i];
+  //     if (sec.fullWidth || sec.name == "Logout" || sec.name == "Manage") {
+  //       children.add(_buildSectionCard(context, sec, i));
+  //       children.add(SizedBox(height: Responsive.height(context) * 0.016));
+  //     } else {
+  //       if (i + 1 < sections.length &&
+  //           !sections[i + 1].fullWidth &&
+  //           sections[i + 1].name != "Logout" &&
+  //           sections[i + 1].name != "Manage") {
+  //         children.add(
+  //           Row(
+  //             children: [
+  //               Expanded(child: _buildSectionCard(context, sec, i)),
+  //               SizedBox(width: Responsive.width(context) * 0.04),
+  //               Expanded(
+  //                 child: _buildSectionCard(context, sections[i + 1], i + 1),
+  //               ),
+  //             ],
+  //           ),
+  //         );
+  //         children.add(SizedBox(height: Responsive.height(context) * 0.016));
+  //         i++;
+  //       } else {
+  //         children.add(_buildSectionCard(context, sec, i));
+  //         children.add(SizedBox(height: Responsive.height(context) * 0.016));
+  //       }
+  //     }
+  //   }
+  //   return Column(children: children);
+  // }
+
+  // ✅ Layout logic refined to use the `fullWidth` property correctly
+  Widget _buildRoleBasedLayout(
+    BuildContext context,
+    String role,
+    String department,
+  ) {
+    // 💡 Ab getSections mein department bhi pass hoga
+    final sections = controller.getSections(role, department);
+
+    List<Widget> gridItems = [];
+    List<Widget> layoutChildren = [];
+
+    // Loop through sections to separate full-width items from grid items
     for (int i = 0; i < sections.length; i++) {
       final sec = sections[i];
-      if (sec.fullWidth || sec.name == "Logout" || sec.name == "Overview") {
-        children.add(_buildSectionCard(context, sec, i));
-        children.add(SizedBox(height: Responsive.height(context) * 0.016));
-      } else {
-        if (i + 1 < sections.length &&
-            !sections[i + 1].fullWidth &&
-            sections[i + 1].name != "Logout" &&
-            sections[i + 1].name != "Overview") {
-          children.add(
+      if (sec.fullWidth) {
+        // Agar grid mein koi item pending hai, toh pehle usko Row mein wrap karke add karo
+        if (gridItems.isNotEmpty) {
+          layoutChildren.add(
             Row(
               children: [
-                Expanded(child: _buildSectionCard(context, sec, i)),
-                SizedBox(width: Responsive.width(context) * 0.04),
-                Expanded(
-                  child: _buildSectionCard(context, sections[i + 1], i + 1),
-                ),
+                Expanded(child: gridItems[0]),
+                if (gridItems.length > 1) const SizedBox(width: 12),
+                if (gridItems.length > 1) Expanded(child: gridItems[1]),
+                if (gridItems.length == 1)
+                  Expanded(child: Container()), // Empty space for alignment
               ],
             ),
           );
-          children.add(SizedBox(height: Responsive.height(context) * 0.016));
-          i++;
-        } else {
-          children.add(_buildSectionCard(context, sec, i));
-          children.add(SizedBox(height: Responsive.height(context) * 0.016));
+          layoutChildren.add(
+            SizedBox(height: Responsive.height(context) * 0.016),
+          );
+          gridItems.clear(); // Grid items clear karo
+        }
+
+        // Full width item ko direct add karo
+        layoutChildren.add(_buildSectionCard(context, sec, i));
+        layoutChildren.add(
+          SizedBox(height: Responsive.height(context) * 0.016),
+        );
+      } else {
+        // Grid item ko list mein add karo
+        gridItems.add(_buildSectionCard(context, sec, i));
+
+        // Agar 2 items jama ho gaye ya yeh aakhri item hai
+        if (gridItems.length == 2 || i == sections.length - 1) {
+          layoutChildren.add(
+            Row(
+              children: [
+                Expanded(child: gridItems[0]),
+                if (gridItems.length > 1) const SizedBox(width: 12),
+                if (gridItems.length > 1) Expanded(child: gridItems[1]),
+                if (gridItems.length == 1)
+                  Expanded(child: Container()), // Empty space for alignment
+              ],
+            ),
+          );
+          layoutChildren.add(
+            SizedBox(height: Responsive.height(context) * 0.016),
+          );
+          gridItems.clear();
         }
       }
     }
-    return Column(children: children);
+
+    // Final check for remaining single grid item (though the above logic should cover it)
+    if (gridItems.isNotEmpty) {
+      layoutChildren.add(
+        Row(
+          children: [
+            Expanded(child: gridItems[0]),
+            Expanded(child: Container()),
+          ],
+        ),
+      );
+      layoutChildren.add(SizedBox(height: Responsive.height(context) * 0.016));
+    }
+
+    return Column(children: layoutChildren);
   }
 
   @override
@@ -316,7 +402,7 @@ class DashboardScreen extends StatelessWidget {
                     horizontal: Responsive.width(context) * 0.04,
                     vertical: 10,
                   ),
-                  child: _buildRoleBasedLayout(context, role),
+                  child: _buildRoleBasedLayout(context, role, department),
                 ),
               ),
             ],

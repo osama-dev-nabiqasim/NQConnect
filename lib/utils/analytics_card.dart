@@ -27,6 +27,7 @@ class AnalyticsCard extends StatelessWidget {
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center, // Added this
         children: [
