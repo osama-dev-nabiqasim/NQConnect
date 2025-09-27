@@ -245,15 +245,46 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Your Response: ${_userRsvpStatus == 1
-                        ? '✅ Going'
-                        : _userRsvpStatus == 2
-                        ? '❌ Not Going'
-                        : '🤔 Maybe'}",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          // Light color for a soft, elevated look
+                          color: Colors.white.withOpacity(0.3),
+                          offset: const Offset(-5, -5), // Top-left light source
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                        ),
+                        BoxShadow(
+                          // Slightly darker/subtle color for depth
+                          color: Colors.black.withOpacity(0.1),
+                          offset: const Offset(5, 5), // Bottom-right shadow
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ],
+
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        width: 1,
+                        color: Colors.black.withOpacity(
+                          0.4,
+                        ), // Glassy look ke liye light border
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "Your Response: ${_userRsvpStatus == 1
+                            ? '✅ Going'
+                            : _userRsvpStatus == 2
+                            ? '❌ Not Going'
+                            : '🤔 Maybe'}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                   ElevatedButton(
@@ -307,6 +338,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
                     icon: const Icon(Icons.check),
                     label: const Text("Going"),
                     // Ab _startRsvpProcess ko call karein
@@ -316,14 +350,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     icon: const Icon(Icons.close),
                     label: const Text("Not Going"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(
-                        context,
-                      ).primaryColor, // Use theme color or adjust
+                      backgroundColor: Colors.red,
                     ),
                     // Ab _startRsvpProcess ko call karein
                     onPressed: () => _startRsvpProcess(2),
                   ),
                   ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orangeAccent,
+                    ),
                     icon: const Icon(Icons.help_outline),
                     label: const Text("Maybe"),
                     // Ab _startRsvpProcess ko call karein

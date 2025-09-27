@@ -49,7 +49,7 @@ class DashboardController extends GetxController {
       name: "Logout",
       icon: Icons.logout_outlined,
       route: "",
-      fullWidth: true,
+      fullWidth: false,
     ),
   ];
 
@@ -87,10 +87,21 @@ class DashboardController extends GetxController {
     //   icon: Icons.notifications,
     //   route: "/notifications",
     // ),
-    Section(name: "Logout", icon: Icons.logout_outlined, route: ""),
+    Section(
+      name: "Logout",
+      icon: Icons.logout_outlined,
+      route: "",
+      fullWidth: false,
+    ),
   ];
   // ----------------------------------Admin Section--------------------------------------------------------
   List<Section> adminSections = [
+    Section(
+      name: "Create Event",
+      icon: Icons.add_box,
+      route: "/event_create",
+      fullWidth: true,
+    ),
     Section(
       name: "Manage Events",
       icon: Icons.manage_search,
@@ -117,13 +128,6 @@ class DashboardController extends GetxController {
     ),
 
     Section(
-      name: "Create Event",
-      icon: Icons.add_box,
-      route: "/event_create",
-      fullWidth: true,
-    ),
-
-    Section(
       name: "Logout",
       icon: Icons.logout_outlined,
       route: "",
@@ -139,6 +143,7 @@ class DashboardController extends GetxController {
   // }
   List<Section> getSections(String role, String department) {
     List<Section> baseSections;
+    final isHR = department.toUpperCase() == "HR";
 
     if (role == "admin") {
       baseSections = adminSections;
@@ -149,40 +154,92 @@ class DashboardController extends GetxController {
       baseSections = employeeSections;
     }
 
+    List<Section> finalSections = baseSections
+        .map(
+          (s) => Section(
+            name: s.name,
+            icon: s.icon,
+            route: s.route,
+            fullWidth: s.fullWidth,
+          ),
+        )
+        .toList();
+
+    // ------------------------ Apply New Custom Full-Width Logic ------------------------
+
     // 💡 HR Department ke liye Event Management sections add karein
-    if ((role == "employee" || role == "manager") &&
-        department.toUpperCase() == "HR") {
-      // Admin sections ko base sections mein merge karein, lekin duplicates avoid karein
-      // Hum eventAdminSections ko baseSections se pehle daalenge
-      final allSections = <Section>[...eventAdminSections, ...baseSections];
-
-      // Logout ko sabse last mein rakhne ke liye sort karein
-      allSections.sort(
-        (a, b) => a.name == "Logout"
-            ? 1
-            : b.name == "Logout"
-            ? -1
-            : 0,
-      );
-
-      // Duplicate sections ko remove karne ke liye, hum sirf unique routes (ya names) lenge.
-      final uniqueSections = <String, Section>{};
-      for (var sec in allSections) {
-        // Agar Logout hai, toh hamesha usko fullWidth rakhna hai jaisa Admin mein hai.
-        if (sec.name == "Logout") {
-          uniqueSections[sec.name] = Section(
-            name: sec.name,
-            icon: sec.icon,
-            route: sec.route,
+    if (role == "employee" && !isHR) {
+      finalSections = finalSections.map((sec) {
+        if (sec.name == "Upcoming Events") {
+          return sec.copyWith(fullWidth: true); // ✅ Upcoming Events full-width
+        } else if (sec.name == "Logout") {
+          return sec.copyWith(
             fullWidth: true,
-          );
-        } else {
-          uniqueSections[sec.name] = sec;
+          ); // ✅ Employee (non-HR) mein Logout full-width
         }
-      }
-      return uniqueSections.values.toList();
+        return sec.copyWith(fullWidth: false); // Baki sab half width
+      }).toList();
+
+      // Condition 2: agr role = employee and depart=HR ho tw logout ka button full width may show nhi ho.
+    } else if (role == "employee" && isHR) {
+      // 💡 HR Employee ke liye Event Management sections add karein
+      finalSections.insertAll(0, eventAdminSections);
+
+      // Update flags in the combined list
+      finalSections = finalSections.map((sec) {
+        if (sec.name == "Logout") {
+          return sec.copyWith(
+            fullWidth: false,
+          ); // ✅ HR Employee: Logout is NOT full-width
+        }
+        // Create Event is already true in eventAdminSections
+        return sec;
+      }).toList();
+
+      // Condition 3: agr role=manager and depart=any except HR, logout ka box full width ho.
+    } else if (role == "manager" && !isHR) {
+      finalSections = finalSections.map((sec) {
+        if (sec.name == "Logout") {
+          return sec.copyWith(
+            fullWidth: true,
+          ); // ✅ Non-HR Manager: Logout full-width
+        }
+        return sec;
+      }).toList();
+
+      // Condition 4: Manager (HR)
+    } else if (role == "manager" && isHR) {
+      // 💡 HR Manager ke liye Event Management sections add karein
+      finalSections.insertAll(0, eventAdminSections);
+
+      // Update flags in the combined list
+      finalSections = finalSections.map((sec) {
+        if (sec.name == "Logout") {
+          return sec.copyWith(
+            fullWidth: true,
+          ); // ✅ HR Manager: Logout is NOT full-width
+        }
+        // Create Event is already true in eventAdminSections
+        return sec;
+      }).toList();
     }
 
-    return baseSections;
+    // Final step for HR/Admin: Remove duplicate "Upcoming Events" if it was added from baseSections
+    final uniqueSections = <String, Section>{};
+    for (var sec in finalSections) {
+      uniqueSections[sec.name] = sec;
+    }
+
+    // Logout ko sabse last mein rakhne ke liye sort karein
+    final result = uniqueSections.values.toList();
+    result.sort(
+      (a, b) => a.name == "Logout"
+          ? 1
+          : b.name == "Logout"
+          ? -1
+          : 0,
+    );
+
+    return result;
   }
 }
